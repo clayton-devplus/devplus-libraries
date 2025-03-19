@@ -1,0 +1,56 @@
+name: Publish NuGet Package
+
+on:
+  push:
+    tags:
+      - "Devplus.Messaging-v*"
+      - "Devplus.Logging-v*"
+      - "Devplus.Caching-v*"
+      - "Devplus.Security-v*"
+      - "Devplus.Common-v*"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout do Código
+        uses: actions/checkout@v3
+
+      - name: 🔧 Configurar .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: "8.0.x" # Alterar para a versão do seu projeto
+
+      - name: 🔍 Restaurar Dependências
+        run: dotnet restore Devplus.Libraries.sln
+
+      - name: 🏗️ Build do Projeto
+        run: dotnet build Devplus.Libraries.sln --configuration Release --no-restore
+
+      #   - name: ✅ Executar Testes
+      #     run: dotnet test Devplus.Libraries.sln --configuration Release --no-build --verbosity normal
+
+      - name: 📦 Detectar e Publicar Pacote no NuGet
+        run: |
+          TAG_NAME=$(echo $GITHUB_REF | sed 's|refs/tags/||')
+          LIBRARY_NAME=$(echo $TAG_NAME | cut -d'-' -f1)
+
+          if [[ "$TAG_NAME" == Devplus.Messaging-v* ]]; then
+              dotnet pack Devplus.Messaging/Devplus.Messaging.csproj --configuration Release --output out/
+          elif [[ "$TAG_NAME" == Devplus.Logging-v* ]]; then
+              dotnet pack Devplus.Logging/Devplus.Logging.csproj --configuration Release --output out/
+          elif [[ "$TAG_NAME" == Devplus.Caching-v* ]]; then
+              dotnet pack Devplus.Caching/Devplus.Caching.csproj --configuration Release --output out/
+          elif [[ "$TAG_NAME" == Devplus.Security-v* ]]; then
+              dotnet pack Devplus.Security/Devplus.Security.csproj --configuration Release --output out/
+          elif [[ "$TAG_NAME" == Devplus.Common-v* ]]; then
+              dotnet pack Devplus.Common/Devplus.Common.csproj --configuration Release --output out/
+          else
+              echo "Nenhuma biblioteca correspondente encontrada."
+              exit 1
+          fi
+
+          for package in out/*.nupkg; do
+              dotnet nuget push "$package" --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+          done
