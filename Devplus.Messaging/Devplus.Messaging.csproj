@@ -4,6 +4,13 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <PackageId>Devplus.Messaging</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Devplus</Authors>
+    <Company>Devplus Consultoria</Company>
+    <Description>Biblioteca para mensageria com RabbitMQ.</Description>
+    <RepositoryUrl>https://github.com/clayton-devplus/devplus-libraries</RepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>    
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,5 +18,5 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
     <PackageReference Include="RabbitMQ.Client" Version="6.5.1" />
   </ItemGroup>
-  
+
 </Project>
