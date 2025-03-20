@@ -1,6 +1,6 @@
 # Devplus.Libraries 🚀
 
-[![License](https://img.shields.io/github/license/clayton-devplus/devplus-libraries)](LICENSE)
+[![License](https://img.shields.io/github/license/clayton-devplus/devplus-libraries)](https://github.com/clayton-devplus/devplus-libraries/blob/main/LICENSE)
 [![NuGet](https://img.shields.io/nuget/v/Devplus.Messaging.svg?label=Messaging)](https://www.nuget.org/packages/Devplus.Messaging/)
 [![NuGet](https://img.shields.io/nuget/v/Devplus.Logging.svg?label=Logging)](https://www.nuget.org/packages/Devplus.Logging/)
 [![NuGet](https://img.shields.io/nuget/v/Devplus.Caching.svg?label=Caching)](https://www.nuget.org/packages/Devplus.Caching/)
@@ -53,4 +53,4 @@ Este projeto está licenciado sob a [MIT License](LICENSE).
 ## 📞 **Contato**
 📧 Email: [clayton@devplus.com.br](mailto:clayton@devplus.com.br)  
 🔗 LinkedIn: [Clayton Oliveira](https://www.linkedin.com/in/clayton-oliveira-7929b121/)  
-🚀 Devplus Consultoria: [www.devplus.com.br](https://www.devplus.com.br)  
+🚀 Devplus Consultoria: [www.devplus.com.br](https://www.devplus.com.br)
