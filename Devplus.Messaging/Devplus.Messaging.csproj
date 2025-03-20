@@ -17,8 +17,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
-    <PackageReference Include="RabbitMQ.Client" Version="6.5.1" />
-    <None Include="README.md" Pack="true" PackagePath="" />
+    <PackageReference Include="RabbitMQ.Client" Version="6.6.0" />
+    <None Include="README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
 </Project>
