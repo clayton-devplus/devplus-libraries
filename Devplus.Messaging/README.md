@@ -2,7 +2,6 @@
 
 [![NuGet](https://img.shields.io/nuget/v/Devplus.Messaging.svg)](https://www.nuget.org/packages/Devplus.Messaging/)
 [![Downloads](https://img.shields.io/nuget/dt/Devplus.Messaging.svg)](https://www.nuget.org/packages/Devplus.Messaging/)
-[![License](https://img.shields.io/github/license/DevplusConsultoria/Devplus.Messaging)](LICENSE)
 
 📬 Biblioteca para integração com RabbitMQ e mensageria na arquitetura limpa.
 
@@ -28,22 +27,42 @@ Ou, no **Visual Studio**:
 
 ### 📦 **Publicando Mensagens**
 ```csharp
-using Devplus.Messaging;
+using Devplus.Messaging.Interfaces;
 
-var publisher = new RabbitMqPublisher("localhost");
-var message = new { Text = "Olá, RabbitMQ!" };
-publisher.Publish(message, "my_exchange", "my_routing_key");
+    private readonly IMessagingPublisher _messagingPublisher;
+    public TestMessageService(IMessagingPublisher messagingProducer)
+    {
+        _messagingPublisher = messagingProducer;
+    }
+    public async Task SendMessage()
+    {
+        await _messagingPublisher.PublishAsync(queueName: "devplus-test-queue",
+                                                message: "{responseData: \"Test message from TestMessageService\"}",
+                                                source: "devplus.test.app",
+                                                typeEvent: "test-event");
+    }
 ```
 
 ### 📩 **Consumindo Mensagens**
 ```csharp
-using Devplus.Messaging;
+using Devplus.Messaging.Interfaces;
+using Devplus.Messaging.Models;
 
-var consumer = new RabbitMqConsumer("localhost");
-consumer.Subscribe("my_queue", (message) => 
+namespace Devplus.TestApp.Consumers;
+public class TestConsumer : IMessagingConsumer
 {
-    Console.WriteLine($"Recebido: {message}");
-});
+    public string QueueName => "devplus-test-queue";
+    private readonly ILogger<TestConsumer> _logger;
+    public TestConsumer(ILogger<TestConsumer> logger)
+    {
+        _logger = logger;
+    }
+    public Task HandleMessageAsync(CloudEvent<object> cloudEvent, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Received message: {Message}", cloudEvent.Data);
+        return Task.CompletedTask;
+    }
+}
 ```
 
 ---
@@ -52,10 +71,11 @@ consumer.Subscribe("my_queue", (message) =>
 ```json
 {
   "RabbitMq": {
-    "HostName": "localhost",
-    "Exchange": "my_exchange",
-    "Queue": "my_queue",
-    "RoutingKey": "my_routing_key"
+    "Host": "localhost",
+    "Port": "5672",
+    "Username": "user",
+    "Password": "pass",
+    "VHost": "my_vhost"    
   }
 }
 ```
@@ -67,7 +87,8 @@ var configuration = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json")
     .Build();
 
-builder.Services.AddRabbitMqMessaging(configuration);
+builder.Services.AddMessaging(builder.Configuration);
+
 ```
 
 ---
