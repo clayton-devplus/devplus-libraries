@@ -1,7 +1,6 @@
 # Devplus.Libraries 🚀
 
-[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/DevplusConsultoria/Devplus.Libraries/publish.yml)](https://github.com/DevplusConsultoria/Devplus.Libraries/actions)
-[![License](https://img.shields.io/github/license/DevplusConsultoria/Devplus.Libraries)](LICENSE)
+[![License](https://img.shields.io/github/license/clayton-devplus/devplus-libraries)](LICENSE)
 [![NuGet](https://img.shields.io/nuget/v/Devplus.Messaging.svg?label=Messaging)](https://www.nuget.org/packages/Devplus.Messaging/)
 [![NuGet](https://img.shields.io/nuget/v/Devplus.Logging.svg?label=Logging)](https://www.nuget.org/packages/Devplus.Logging/)
 [![NuGet](https://img.shields.io/nuget/v/Devplus.Caching.svg?label=Caching)](https://www.nuget.org/packages/Devplus.Caching/)
