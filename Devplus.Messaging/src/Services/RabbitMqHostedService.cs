@@ -4,6 +4,7 @@ using Devplus.Messaging.Interfaces;
 using Devplus.Messaging.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -14,10 +15,12 @@ namespace Devplus.Messaging.Services
         private readonly IServiceProvider _serviceProvider;
         private readonly IConnection _connection;
         private readonly IModel _channel;
+        private readonly ILogger<RabbitMqHostedService> _logger;
 
-        public RabbitMqHostedService(IServiceProvider serviceProvider, IConnectionFactory connectionFactory)
+        public RabbitMqHostedService(IServiceProvider serviceProvider, IConnectionFactory connectionFactory, ILogger<RabbitMqHostedService> logger)
         {
             _serviceProvider = serviceProvider;
+            _logger = logger;
             _connection = connectionFactory.CreateConnection();
             _channel = _connection.CreateModel();
         }
@@ -35,7 +38,7 @@ namespace Devplus.Messaging.Services
 
                 if (queueName == null)
                 {
-                    Console.WriteLine($"Consumidor {consumerType.Name} não possui uma fila definida.");
+                    _logger.LogWarning("Consumidor {0} não possui uma fila definida.", consumerType.Name);
                     continue;
                 }
 
@@ -74,7 +77,7 @@ namespace Devplus.Messaging.Services
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Erro ao processar mensagem: {ex.Message}");
+                        _logger.LogError(ex, "Erro ao processar mensagem");
                         _channel.BasicNack(args.DeliveryTag, multiple: false, requeue: true);
                     }
                 };
