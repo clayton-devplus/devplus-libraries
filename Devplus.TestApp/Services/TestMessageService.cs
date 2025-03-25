@@ -12,7 +12,7 @@ public class TestMessageService : ITestMessageService
     }
     public async Task SendMessage()
     {
-        await _messagingPublisher.PublishAsync(queueName: "devplus-test-queue",
+        await _messagingPublisher.PublishAsync(exchangeName: "devplus-test-exchange",
                                                 message: "{responseData: \"Test message from TestMessageService\"}",
                                                 source: "devplus.test.app",
                                                 typeEvent: "test-event");

@@ -35,17 +35,36 @@ namespace Devplus.Messaging.Services
             {
                 var consumerType = consumer.GetType();
                 var queueName = (string)consumerType.GetProperty("QueueName")?.GetValue(consumer);
+                var exchangeName = (string)consumerType.GetProperty("ExchangeName")?.GetValue(consumer);
+                var routingKey = (string)consumerType.GetProperty("RoutingKey")?.GetValue(consumer);
 
-                if (queueName == null)
+                if (string.IsNullOrEmpty(queueName))
                 {
                     _logger.LogWarning("Consumidor {0} não possui uma fila definida.", consumerType.Name);
                     continue;
                 }
+                if (string.IsNullOrEmpty(exchangeName))
+                {
+                    _logger.LogWarning("Consumidor {0} não possui uma Exchange definida.", consumerType.Name);
+                    continue;
+                }
 
-                _channel.QueueDeclare(queue: queueName, durable: true, exclusive: false, autoDelete: false);
+                _channel.ExchangeDeclare(exchange: exchangeName,
+                                         type: "topic", // ou outro tipo conforme a necessidade
+                                         durable: true,
+                                         autoDelete: false,
+                                         arguments: null);
+
+                _channel.QueueDeclare(queue: queueName,
+                                      durable: true,
+                                      exclusive: false,
+                                      autoDelete: false);
+
+                _channel.QueueBind(queue: queueName,
+                                   exchange: exchangeName,
+                                   routingKey: routingKey);
 
                 var eventConsumer = new EventingBasicConsumer(_channel);
-
                 eventConsumer.Received += async (sender, args) =>
                 {
                     var body = args.Body.ToArray();

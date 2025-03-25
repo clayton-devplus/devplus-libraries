@@ -15,19 +15,29 @@ public class RabbitMqPublisher : IMessagingPublisher
         _connection = connection;
     }
 
-    public Task PublishAsync<T>(string queueName, T message, string typeEvent, string source)
+    public Task PublishAsync<T>(string exchangeName, T message, string typeEvent,
+                                                                string source,
+                                                                string messageId = "",
+                                                                string routingKey = "")
     {
+
+        if (string.IsNullOrEmpty(messageId))
+        {
+            messageId = Guid.NewGuid().ToString();
+        }
+
         using var channel = _connection.CreateModel();
-        channel.QueueDeclare(queue: queueName,
-                             durable: true,
-                             exclusive: false,
-                             autoDelete: false,
-                             arguments: null);
+
+        channel.ExchangeDeclare(exchange: exchangeName,
+                                    type: "topic",
+                                    durable: true,
+                                    autoDelete: false,
+                                    arguments: null);
 
         var cloudEvent = new CloudEvent<T>
         {
             SpecVersion = "1.0",
-            Id = Guid.NewGuid().ToString(),
+            Id = messageId.ToString(),
             Source = source,
             Type = typeEvent,
             Time = DateTimeOffset.UtcNow,
@@ -41,10 +51,11 @@ public class RabbitMqPublisher : IMessagingPublisher
             PropertyNameCaseInsensitive = true
         }));
 
-        channel.BasicPublish(exchange: "",
-                             routingKey: queueName,
-                             basicProperties: null,
-                             body: body);
+        channel.BasicPublish(
+                exchange: exchangeName,
+                routingKey: routingKey,
+                basicProperties: null,
+                body: body);
 
         return Task.CompletedTask;
     }

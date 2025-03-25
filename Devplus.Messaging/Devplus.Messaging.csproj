@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageId>Devplus.Messaging</PackageId>
-    <Version>1.0.2</Version>
+    <Version>2.0.0</Version>
     <Authors>Devplus</Authors>
     <Company>Devplus Consultoria</Company>
     <Description>Biblioteca para mensageria com RabbitMQ.</Description>
