@@ -3,7 +3,7 @@
 [![NuGet](https://img.shields.io/nuget/v/Devplus.Messaging.svg)](https://www.nuget.org/packages/Devplus.Messaging/)
 [![Downloads](https://img.shields.io/nuget/dt/Devplus.Messaging.svg)](https://www.nuget.org/packages/Devplus.Messaging/)
 
-📬 Biblioteca para integração com RabbitMQ e mensageria na arquitetura limpa.
+📬 Biblioteca para integração com RabbitMQ e mensageria.
 
 ---
 
