@@ -56,6 +56,7 @@ public class TestConsumer : IMessagingConsumer
     public string QueueName => "devplus-test-queue";
     public string ExchangeName => "devplus-test-exchange";
     public string RoutingKey => "";
+    public int MaxRetry => 3;
 
     private readonly ILogger<TestConsumer> _logger;
 
@@ -73,6 +74,7 @@ public class TestConsumer : IMessagingConsumer
 ```
 
 **QueueName e ExchangeName** são obrigatórios para a lib realizar o bind no RabbitMq.
+**MaxRetry** configura o numero máximo de tentativas que a menssagem é processada até ser enviada para DLQ.
 
 ---
 
