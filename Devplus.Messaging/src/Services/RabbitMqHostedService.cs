@@ -34,9 +34,10 @@ namespace Devplus.Messaging.Services
             foreach (var consumer in consumers)
             {
                 var consumerType = consumer.GetType();
-                var queueName = (string)consumerType.GetProperty("QueueName")?.GetValue(consumer);
-                var exchangeName = (string)consumerType.GetProperty("ExchangeName")?.GetValue(consumer);
-                var routingKey = (string)consumerType.GetProperty("RoutingKey")?.GetValue(consumer);
+                var queueName = consumer.QueueName;
+                var exchangeName = consumer.ExchangeName;
+                var routingKey = consumer.RoutingKey;
+                var maxRetry = consumer.MaxRetry;
 
                 if (string.IsNullOrEmpty(queueName))
                 {
@@ -49,26 +50,25 @@ namespace Devplus.Messaging.Services
                     continue;
                 }
 
-                _channel.ExchangeDeclare(exchange: exchangeName,
-                                         type: "topic", // ou outro tipo conforme a necessidade
-                                         durable: true,
-                                         autoDelete: false,
-                                         arguments: null);
+                var dlxExchange = $"{exchangeName}-dlx";
+                var dlqQueue = $"{queueName}-dlq";
 
-                _channel.QueueDeclare(queue: queueName,
-                                      durable: true,
-                                      exclusive: false,
-                                      autoDelete: false);
+                _channel.ExchangeDeclare(exchange: exchangeName, type: "topic", durable: true, autoDelete: false);
+                _channel.ExchangeDeclare(exchange: dlxExchange, type: "fanout", durable: true, autoDelete: false);
 
-                _channel.QueueBind(queue: queueName,
-                                   exchange: exchangeName,
-                                   routingKey: routingKey);
+                _channel.QueueDeclare(queue: queueName, durable: true, exclusive: false, autoDelete: false);
+                _channel.QueueDeclare(queue: dlqQueue, durable: true, exclusive: false, autoDelete: false);
+
+                _channel.QueueBind(queue: queueName, exchange: exchangeName, routingKey: routingKey);
+                _channel.QueueBind(queue: dlqQueue, exchange: dlxExchange, routingKey: "");
+
 
                 var eventConsumer = new EventingBasicConsumer(_channel);
                 eventConsumer.Received += async (sender, args) =>
                 {
                     var body = args.Body.ToArray();
                     var messageJson = Encoding.UTF8.GetString(body);
+                    var props = args.BasicProperties;
 
                     try
                     {
@@ -85,7 +85,7 @@ namespace Devplus.Messaging.Services
                             using var messageScope = _serviceProvider.CreateScope();
                             var scopedConsumer = messageScope.ServiceProvider.GetRequiredService(consumerType);
 
-                            var handleMethod = consumerType.GetMethod("HandleMessageAsync");
+                            var handleMethod = consumerType.GetMethod("ConsumeAsync");
                             if (handleMethod != null)
                             {
                                 await (Task)handleMethod.Invoke(scopedConsumer, new[] { cloudEvent, stoppingToken });
@@ -96,8 +96,40 @@ namespace Devplus.Messaging.Services
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "Erro ao processar mensagem");
-                        _channel.BasicNack(args.DeliveryTag, multiple: false, requeue: true);
+                        _logger.LogError(ex, "Erro ao processar mensagem da fila {QueueName}", queueName);
+
+                        int retryCount = 0;
+                        if (props.Headers != null && props.Headers.TryGetValue("x-retry-count", out var headerValue))
+                        {
+                            if (headerValue is byte[] bytes)
+                                retryCount = int.Parse(Encoding.UTF8.GetString(bytes));
+                        }
+
+                        if (retryCount >= maxRetry)
+                        {
+                            _logger.LogWarning("Tentativas excedidas para mensagem. Enviando para DLQ: {DlqQueue}", dlqQueue);
+
+                            var dlqProps = _channel.CreateBasicProperties();
+                            dlqProps.Persistent = true;
+                            dlqProps.Headers = props.Headers;
+
+                            _channel.BasicPublish(exchange: dlxExchange, routingKey: "", basicProperties: dlqProps, body: body);
+                            _channel.BasicAck(args.DeliveryTag, false);
+                        }
+                        else
+                        {
+                            retryCount++;
+
+                            var retryProps = _channel.CreateBasicProperties();
+                            retryProps.Persistent = true;
+                            retryProps.Headers = props.Headers ?? new Dictionary<string, object>();
+                            retryProps.Headers["x-retry-count"] = Encoding.UTF8.GetBytes(retryCount.ToString());
+
+                            _channel.BasicPublish(exchange: "", routingKey: queueName, basicProperties: retryProps, body: body);
+                            _channel.BasicAck(args.DeliveryTag, false);
+                        }
+                        // _logger.LogError(ex, "Erro ao processar mensagem");
+                        // _channel.BasicNack(args.DeliveryTag, multiple: false, requeue: true);
                     }
                 };
 
