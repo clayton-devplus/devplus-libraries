@@ -14,7 +14,6 @@ namespace Devplus.Messaging.Services
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly IConnection _connection;
-        //private readonly IModel _channel;
         private readonly ILogger<RabbitMqHostedService> _logger;
 
         public RabbitMqHostedService(IServiceProvider serviceProvider, IConnectionFactory connectionFactory, ILogger<RabbitMqHostedService> logger)
@@ -22,13 +21,11 @@ namespace Devplus.Messaging.Services
             _serviceProvider = serviceProvider;
             _logger = logger;
             _connection = connectionFactory.CreateConnection();
-            //_channel = _connection.CreateModel();
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             using var scope = _serviceProvider.CreateScope();
-
             var consumers = scope.ServiceProvider.GetServices<IMessagingConsumer>().ToList();
 
             foreach (var consumer in consumers)
@@ -86,14 +83,7 @@ namespace Devplus.Messaging.Services
 
                         if (cloudEvent != null)
                         {
-                            using var messageScope = _serviceProvider.CreateScope();
-                            var scopedConsumer = messageScope.ServiceProvider.GetRequiredService(consumerType);
-
-                            var handleMethod = consumerType.GetMethod("ConsumeAsync");
-                            if (handleMethod != null)
-                            {
-                                await (Task)handleMethod.Invoke(scopedConsumer, new[] { cloudEvent, stoppingToken });
-                            }
+                            await consumer.ConsumeAsync((CloudEvent<object>)cloudEvent, stoppingToken);
                         }
 
                         _channel.BasicAck(args.DeliveryTag, multiple: false);
@@ -117,6 +107,11 @@ namespace Devplus.Messaging.Services
                             dlqProps.Persistent = true;
                             dlqProps.Headers = props.Headers;
 
+                            if (dlqProps.Headers == null)
+                                dlqProps.Headers = new Dictionary<string, object>();
+
+                            dlqProps.Headers["x-send-dlq"] = Encoding.UTF8.GetBytes(DateTime.UtcNow.ToString("o"));
+
                             _channel.BasicPublish(exchange: dlxExchange, routingKey: "", basicProperties: dlqProps, body: body);
                             _channel.BasicAck(args.DeliveryTag, false);
                         }
@@ -128,12 +123,12 @@ namespace Devplus.Messaging.Services
                             retryProps.Persistent = true;
                             retryProps.Headers = props.Headers ?? new Dictionary<string, object>();
                             retryProps.Headers["x-retry-count"] = Encoding.UTF8.GetBytes(retryCount.ToString());
+                            retryProps.Headers["x-last-process"] = Encoding.UTF8.GetBytes(DateTime.UtcNow.ToString("o"));
 
                             _channel.BasicPublish(exchange: "", routingKey: queueName, basicProperties: retryProps, body: body);
                             _channel.BasicAck(args.DeliveryTag, false);
                         }
-                        // _logger.LogError(ex, "Erro ao processar mensagem");
-                        // _channel.BasicNack(args.DeliveryTag, multiple: false, requeue: true);
+
                     }
                 };
 

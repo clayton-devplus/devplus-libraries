@@ -4,10 +4,7 @@ using Devplus.Messaging.Models;
 namespace Devplus.TestApp.Consumers;
 public class TestConsumer : IMessagingConsumer
 {
-    public string QueueName => "devplus-test-queue";
     public string ExchangeName => "devplus-test-exchange";
-    public string RoutingKey => "";
-    public int MaxRetry => 3;
 
     private readonly ILogger<TestConsumer> _logger; public TestConsumer(ILogger<TestConsumer> logger)
     {

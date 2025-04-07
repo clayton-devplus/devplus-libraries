@@ -4,21 +4,21 @@ namespace Devplus.Messaging.Interfaces;
 public interface IMessagingConsumer
 {
     /// <summary>
-    /// Fila de consumo
-    /// </summary>
-    string QueueName { get; }
-    /// <summary>
     /// Exchange da qual a mensagem será recebida
     /// </summary>
     string ExchangeName { get; }
     /// <summary>
+    /// Fila de consumo
+    /// </summary>
+    string QueueName => $"{ExchangeName.Replace("-exchange", "").Replace(".exchange", "")}-queue";
+    /// <summary>
     /// Chave de roteamento para o binding
     /// </summary>
-    string RoutingKey { get; }
+    string RoutingKey => "";
     /// <summary>
     /// Total de tentativas de reprocessamento
     /// </summary>
-    int MaxRetry { get; }
+    int MaxRetry => 5;
     /// <summary>
     /// Quantidade máxima de mensagens simultâneas não processadas (QoS)
     /// </summary>
