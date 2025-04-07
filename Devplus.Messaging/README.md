@@ -94,15 +94,19 @@ A **Dead Letter Queue (DLQ)** é utilizada para armazenar mensagens que não pud
 O suporte a DLQ, está habilitado por padrão na lib, e usará o seguinte padrão para criar a Exchange e fila:
 
 ```csharp
-    ["x-retry-count"]   //Total de tentativas
-    ["x-last-process"]  //Data hora do útimo processamento
-    ["x-send-dlq"]      //Data hora de envio para DLQ
+    var dlxExchange = $"{exchangeName}-dlx";
+    var dlqQueue = $"{queueName}-dlq";
 ```
 
 ### Observação
 
 Caso a menssagem sejá processada até o limite de tentativa configurado em **MaxRetry**, elá será enviaada para a DLQ criada pela lib adicionando o seguintes **Headers**:
 
+```csharp
+    ["x-retry-count"]   //Total de tentativas
+    ["x-last-process"]  //Data hora do útimo processamento
+    ["x-send-dlq"]      //Data hora de envio para DLQ
+```
 
 ## 🔧 **Configuração via `appsettings.json`**
 
