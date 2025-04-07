@@ -53,8 +53,10 @@ using Devplus.Messaging.Models;
 namespace Devplus.TestApp.Consumers;
 public class TestConsumer : IMessagingConsumer
 {
-    public string QueueName => "devplus-test-queue";
     public string ExchangeName => "devplus-test-exchange";
+    
+    //Opcionais, caso não informados a lib atribuirá valores padrões
+    public string QueueName => "devplus-test-queue";
     public string RoutingKey => "";
     public int MaxRetry => 3;
 
@@ -73,7 +75,12 @@ public class TestConsumer : IMessagingConsumer
 }
 ```
 
-**QueueName e ExchangeName** são obrigatórios para a lib realizar o bind no RabbitMq.
+**ExchangeName** é obrigatórios para a lib realizar o bind no RabbitMq.
+
+**QueueName** configura o nome da fila para o criar o bind no Rabbit (caso não informado a lib usará o padrão do nome atribuido a exchange com o sulfixo '-queue').
+
+**RoutingKey** configura uma chave de roteamento para realizar o bind na fila.
+
 **MaxRetry** configura o numero máximo de tentativas que a menssagem é processada até ser enviada para DLQ.
 
 ---
