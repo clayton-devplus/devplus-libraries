@@ -8,19 +8,19 @@ public interface IMessagingConsumer
     /// </summary>
     string ExchangeName { get; }
     /// <summary>
-    /// Fila de consumo
+    /// Fila de consumo da mensagem. (padrao: $"{ExchangeName.Replace("-exchange", "").Replace(".exchange", "")}-queue")
     /// </summary>
     string QueueName => $"{ExchangeName.Replace("-exchange", "").Replace(".exchange", "")}-queue";
     /// <summary>
-    /// Chave de roteamento para o binding
+    /// Chave de roteamento para o binding. (Ex: "devplus-test-routing-key")
     /// </summary>
     string RoutingKey => "";
     /// <summary>
-    /// Total de tentativas de reprocessamento
+    /// Total de tentativas de reprocessamento. 
     /// </summary>
     int MaxRetry => 5;
     /// <summary>
-    /// Quantidade máxima de mensagens simultâneas não processadas (QoS)
+    /// Quantidade máxima de mensagens simultâneas não processadas (QoS). (default: 3)
     /// </summary>
     ushort PrefetchCount => 3;
     /// <summary>

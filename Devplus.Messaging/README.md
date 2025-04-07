@@ -54,7 +54,7 @@ namespace Devplus.TestApp.Consumers;
 public class TestConsumer : IMessagingConsumer
 {
     public string ExchangeName => "devplus-test-exchange";
-    
+
     //Opcionais, caso não informados a lib atribuirá valores padrões
     public string QueueName => "devplus-test-queue";
     public string RoutingKey => "";
@@ -75,13 +75,14 @@ public class TestConsumer : IMessagingConsumer
     }
 }
 ```
-| Propriedade       | Descrição                                                              | Obrig. | Padrão |
-| ----------------- | ---------------------------------------------------------------------- | ------ | ------ |
-| **ExchangeName**  | Nome da exchange. É obrigatórios para a lib realizar o bind no RabbitMq.| Sim    | N/A |
-| **QueueName**     | Configura o nome da fila para o criar o bind no Rabbit | Não | $"{ExchangeName.Replace("-exchange", "").Replace(".exchange", "")}-queue"|
-| **RoutingKey**    | Configura uma chave de roteamento para realizar o bind na fila.        | Não    | "" |
-| **MaxRetry**      | Configura o numero máximo de tentativas que a menssagem é processada até ser enviada para DLQ | Não    |    5   | 
-| **PrefetchCount** | Configura o numero máximo de menssagens simultâneas que um consumidor pode consumir antes de enviar um ACK | Não    | 3 |
+
+| Propriedade       | Descrição                                                                                                  | Obrig. | Padrão                                                                    |
+| ----------------- | ---------------------------------------------------------------------------------------------------------- | ------ | ------------------------------------------------------------------------- |
+| **ExchangeName**  | Nome da exchange. É obrigatórios para a lib realizar o bind no RabbitMq.                                   | Sim    | N/A                                                                       |
+| **QueueName**     | Configura o nome da fila para o criar o bind no Rabbit                                                     | Não    | $"{ExchangeName.Replace("-exchange", "").Replace(".exchange", "")}-queue" |
+| **RoutingKey**    | Configura uma chave de roteamento para realizar o bind na fila.                                            | Não    | ""                                                                        |
+| **MaxRetry**      | Configura o numero máximo de tentativas que a menssagem é processada até ser enviada para DLQ              | Não    | 5                                                                         |
+| **PrefetchCount** | Configura o numero máximo de menssagens simultâneas que um consumidor pode consumir antes de enviar um ACK | Não    | 3                                                                         |
 
 ---
 
@@ -100,7 +101,7 @@ O suporte a DLQ, está habilitado por padrão na lib, e usará o seguinte padrã
 
 ### Observação
 
-Caso a menssagem sejá processada até o limite de tentativa configurado em **MaxRetry**, elá será enviaada para a DLQ criada pela lib adicionando o seguintes **Headers**:
+Caso a menssagem sejá processada até o limite de tentativas configurado em **MaxRetry**, elá será enviada para a DLQ criada pela lib adicionando o seguintes **Headers**:
 
 ```csharp
     ["x-retry-count"]   //Total de tentativas
