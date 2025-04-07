@@ -53,12 +53,18 @@ namespace Devplus.Messaging.Services
 
                 var _channel = _connection.CreateModel();
 
+                var quorumArgs = new Dictionary<string, object>
+                {
+                    { "x-queue-type", "quorum" }
+                };
+
+
                 _channel.BasicQos(0, prefetchCount, global: false);
                 _channel.ExchangeDeclare(exchange: exchangeName, type: "topic", durable: true, autoDelete: false);
                 _channel.ExchangeDeclare(exchange: dlxExchange, type: "fanout", durable: true, autoDelete: false);
 
-                _channel.QueueDeclare(queue: queueName, durable: true, exclusive: false, autoDelete: false);
-                _channel.QueueDeclare(queue: dlqQueue, durable: true, exclusive: false, autoDelete: false);
+                _channel.QueueDeclare(queue: queueName, durable: true, exclusive: false, autoDelete: false, arguments: quorumArgs);
+                _channel.QueueDeclare(queue: dlqQueue, durable: true, exclusive: false, autoDelete: false, arguments: quorumArgs);
 
                 _channel.QueueBind(queue: queueName, exchange: exchangeName, routingKey: routingKey);
                 _channel.QueueBind(queue: dlqQueue, exchange: dlxExchange, routingKey: "");
