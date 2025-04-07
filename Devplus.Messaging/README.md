@@ -77,11 +77,11 @@ public class TestConsumer : IMessagingConsumer
 ```
 | Propriedade       | Descrição                                                              | Obrig. | Padrão |
 | ----------------- | ---------------------------------------------------------------------- | ------ | ------ |
-| **ExchangeName**  | nome da exchange é obrigatórios para a lib realizar o bind no RabbitMq.| Sim    |        |
-| **QueueName**     | configura o nome da fila para o criar o bind no Rabbit | Não | $"{ExchangeName.Replace("-exchange", "").Replace(".exchange", "")}-queue"|
-| **RoutingKey**    | configura uma chave de roteamento para realizar o bind na fila.        | Não    | "" |
-| **MaxRetry**      | configura o numero máximo de tentativas que a menssagem é processada até ser enviada para DLQ | Não    |    5   | 
-| **PrefetchCount** | configura o numero máximo de menssagens simultâneas que um consumidor pode consumir antes de enviar um ACK | Não    | 3 |
+| **ExchangeName**  | Nome da exchange. É obrigatórios para a lib realizar o bind no RabbitMq.| Sim    | N/A |
+| **QueueName**     | Configura o nome da fila para o criar o bind no Rabbit | Não | $"{ExchangeName.Replace("-exchange", "").Replace(".exchange", "")}-queue"|
+| **RoutingKey**    | Configura uma chave de roteamento para realizar o bind na fila.        | Não    | "" |
+| **MaxRetry**      | Configura o numero máximo de tentativas que a menssagem é processada até ser enviada para DLQ | Não    |    5   | 
+| **PrefetchCount** | Configura o numero máximo de menssagens simultâneas que um consumidor pode consumir antes de enviar um ACK | Não    | 3 |
 
 ---
 
