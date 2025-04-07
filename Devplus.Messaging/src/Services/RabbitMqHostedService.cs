@@ -14,7 +14,7 @@ namespace Devplus.Messaging.Services
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly IConnection _connection;
-        private readonly IModel _channel;
+        //private readonly IModel _channel;
         private readonly ILogger<RabbitMqHostedService> _logger;
 
         public RabbitMqHostedService(IServiceProvider serviceProvider, IConnectionFactory connectionFactory, ILogger<RabbitMqHostedService> logger)
@@ -22,7 +22,7 @@ namespace Devplus.Messaging.Services
             _serviceProvider = serviceProvider;
             _logger = logger;
             _connection = connectionFactory.CreateConnection();
-            _channel = _connection.CreateModel();
+            //_channel = _connection.CreateModel();
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -38,6 +38,7 @@ namespace Devplus.Messaging.Services
                 var exchangeName = consumer.ExchangeName;
                 var routingKey = consumer.RoutingKey;
                 var maxRetry = consumer.MaxRetry;
+                var prefetchCount = consumer.PrefetchCount;
 
                 if (string.IsNullOrEmpty(queueName))
                 {
@@ -53,6 +54,9 @@ namespace Devplus.Messaging.Services
                 var dlxExchange = $"{exchangeName}-dlx";
                 var dlqQueue = $"{queueName}-dlq";
 
+                var _channel = _connection.CreateModel();
+
+                _channel.BasicQos(0, prefetchCount, global: false);
                 _channel.ExchangeDeclare(exchange: exchangeName, type: "topic", durable: true, autoDelete: false);
                 _channel.ExchangeDeclare(exchange: dlxExchange, type: "fanout", durable: true, autoDelete: false);
 
@@ -137,13 +141,6 @@ namespace Devplus.Messaging.Services
             }
 
             await Task.CompletedTask;
-        }
-
-        public override Task StopAsync(CancellationToken cancellationToken)
-        {
-            _channel?.Close();
-            _connection?.Close();
-            return base.StopAsync(cancellationToken);
         }
     }
 }

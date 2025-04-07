@@ -20,6 +20,10 @@ public interface IMessagingConsumer
     /// </summary>
     int MaxRetry { get; }
     /// <summary>
+    /// Quantidade máxima de mensagens simultâneas não processadas (QoS)
+    /// </summary>
+    ushort PrefetchCount => 3;
+    /// <summary>
     /// Método de consumo 
     /// </summary>
     /// <param name="cloudEvent"></param>
