@@ -1,8 +1,10 @@
+using Devplus.Messaging.Enum;
 using Devplus.Messaging.Models;
 
 namespace Devplus.Messaging.Interfaces;
 public interface IMessagingConsumer
 {
+    QueueType QueueType => QueueType.Quorum;
     /// <summary>
     /// Exchange da qual a mensagem será recebida
     /// </summary>

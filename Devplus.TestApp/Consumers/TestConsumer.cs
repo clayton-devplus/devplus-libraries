@@ -1,10 +1,11 @@
+using Devplus.Messaging.Enum;
 using Devplus.Messaging.Interfaces;
 using Devplus.Messaging.Models;
 
 namespace Devplus.TestApp.Consumers;
 public class TestConsumer : IMessagingConsumer
 {
-    public string ExchangeName => "devplus-outher-test-exchange";
+    public string ExchangeName => "devplus-test-exchange";
 
     private readonly ILogger<TestConsumer> _logger; public TestConsumer(ILogger<TestConsumer> logger)
     {
