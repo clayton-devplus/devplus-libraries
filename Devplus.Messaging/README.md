@@ -60,6 +60,7 @@ public class TestConsumer : IMessagingConsumer
     public string RoutingKey => "";
     public int MaxRetry => 5;
     public ushort PrefetchCount => 3;
+    QueueType QueueType => QueueType.Quorum;
 
     private readonly ILogger<TestConsumer> _logger;
 
@@ -83,6 +84,7 @@ public class TestConsumer : IMessagingConsumer
 | **RoutingKey**    | Configura uma chave de roteamento para realizar o bind na fila.                                            | Não    | ""                                                                        |
 | **MaxRetry**      | Configura o numero máximo de tentativas que a menssagem é processada até ser enviada para DLQ              | Não    | 5                                                                         |
 | **PrefetchCount** | Configura o numero máximo de menssagens simultâneas que um consumidor pode consumir antes de enviar um ACK | Não    | 3                                                                         |
+| **QueueType** | Configura o numero máximo de menssagens simultâneas que um consumidor pode consumir antes de enviar um ACK | Não    | Quorum                                                                         |
 
 ---
 
