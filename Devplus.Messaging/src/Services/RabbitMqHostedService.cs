@@ -87,7 +87,14 @@ namespace Devplus.Messaging.Services
 
                         if (cloudEvent != null)
                         {
-                            await consumer.ConsumeAsync((CloudEvent<object>)cloudEvent, stoppingToken);
+                            using var messageScope = _serviceProvider.CreateScope();
+                            var scopedConsumer = messageScope.ServiceProvider.GetRequiredService(consumerType);
+
+                            var handleMethod = consumerType.GetMethod("ConsumeAsync");
+                            if (handleMethod != null)
+                            {
+                                await (Task)handleMethod.Invoke(scopedConsumer, new[] { cloudEvent, stoppingToken });
+                            }
                         }
 
                         _channel.BasicAck(args.DeliveryTag, multiple: false);
