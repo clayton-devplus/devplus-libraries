@@ -5,9 +5,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageId>Devplus.Mail</PackageId>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <Authors>Devplus</Authors>
-    <Company>Devplus Consultoria</Company>
+    <Company>Devplus Consultoria</Company>s
     <Description>Biblioteca para envio de emails com SendGrid.</Description>
     <RepositoryUrl>https://github.com/clayton-devplus/devplus-libraries</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
