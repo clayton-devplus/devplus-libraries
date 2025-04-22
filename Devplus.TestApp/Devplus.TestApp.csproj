@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Devplus.Messaging\Devplus.Messaging.csproj" />
+    <ProjectReference Include="..\Devplus.Mail\Devplus.Mail.csproj" />
   </ItemGroup>
 
 </Project>
