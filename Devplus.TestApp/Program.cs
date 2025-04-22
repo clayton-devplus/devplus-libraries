@@ -1,3 +1,4 @@
+using Devplus.Mail;
 using Devplus.Messaging;
 using Devplus.Messaging.Interfaces;
 using Devplus.TestApp.Consumers;
@@ -8,6 +9,7 @@ using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddMessaging(builder.Configuration);
+builder.Services.AddMail(builder.Configuration);
 builder.Services.AddScoped<ITestMessageService, TestMessageService>();
 builder.Services.AddScoped<IMessagingConsumer, TestConsumer>();
 builder.Services.AddScoped<TestConsumer>();
