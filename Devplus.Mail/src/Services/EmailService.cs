@@ -1,4 +1,8 @@
+using System.Reflection;
+using Devplus.Mail.Configuration;
+using Devplus.Mail.Enum;
 using Devplus.Mail.Interfaces;
+using Microsoft.Extensions.Configuration;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 
@@ -6,16 +10,91 @@ namespace Devplus.Mail.Services;
 
 public class EmailService : IEmailService
 {
-    public async Task SendEmailAsync()
+    private readonly IConfiguration _configuration;
+    private readonly SendGridConfig _sendGridConfig;
+
+    public EmailService(IConfiguration configuration)
     {
-        var apiKey = "";
-        var client = new SendGridClient(apiKey);
-        var from = new EmailAddress("clayton.oliveira@devplus.com.br", "Clayton Oliviera");
-        var subject = "Sending with SendGrid is Fun";
-        var to = new EmailAddress("clayton@devplus.com.br", "Example User");
-        var plainTextContent = "and easy to do anywhere, even with C#";
-        var htmlContent = "<strong>and easy to do anywhere, even with C#</strong>";
+        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+        _sendGridConfig = _configuration.GetSection("SendGrid").Get<SendGridConfig>() ?? throw new ArgumentNullException(nameof(_sendGridConfig), "SendGrid configuration section is missing.");
+    }
+    public async Task<bool> SendEmailAsync(string toEmail, string subject, string plainTextContent, string htmlContent)
+    {
+        if (string.IsNullOrEmpty(toEmail))
+            throw new ArgumentException("Recipient email address is required.", nameof(toEmail));
+        if (string.IsNullOrEmpty(subject))
+            throw new ArgumentException("Email subject is required.", nameof(subject));
+        if (string.IsNullOrEmpty(plainTextContent) && string.IsNullOrEmpty(htmlContent))
+            throw new ArgumentException("At least one content type (plain text or HTML) is required.");
+
+        var client = new SendGridClient(_sendGridConfig.ApiKey);
+        var from = new EmailAddress(_sendGridConfig.FromEmail, _sendGridConfig.FromName);
+        var to = new EmailAddress(toEmail);
         var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
         var response = await client.SendEmailAsync(msg);
+
+        return response.StatusCode == System.Net.HttpStatusCode.OK || response.StatusCode == System.Net.HttpStatusCode.Accepted;
     }
+    public async Task<bool> SendTemplateEmail(string toEmail, string subject, string message, string link = "",
+                                                EmailTemplateType templateType = EmailTemplateType.Success)
+    {
+        if (string.IsNullOrEmpty(toEmail))
+            throw new ArgumentException("Recipient email address is required.", nameof(toEmail));
+        if (string.IsNullOrEmpty(subject))
+            throw new ArgumentException("Email subject is required.", nameof(subject));
+        if (string.IsNullOrEmpty(message))
+            throw new ArgumentException("At least one content type (plain text or HTML) is required.");
+
+        string template = string.Empty;
+
+        switch (templateType)
+        {
+            case EmailTemplateType.Success:
+                subject = "✅ Sucesso - " + subject;
+                template = LoadTemplate("Success.html")
+                    .Replace("{{titulo}}", subject)
+                    .Replace("{{mensagem}}", message)
+                    .Replace("{{link}}", link == "" ? "" : $"<a class=\"button\" href=\"{link}\" target=\"_blank\">Ver Detalhes</a>");
+                break;
+            case EmailTemplateType.Warning:
+                subject = "⚠️ Atenção - " + subject;
+                template = LoadTemplate("Warning.html")
+                    .Replace("{{titulo}}", subject)
+                    .Replace("{{mensagem}}", message)
+                    .Replace("{{link}}", link == "" ? "" : $"<a class=\"button\" href=\"{link}\" target=\"_blank\">Ver Detalhes</a>");
+                break;
+            case EmailTemplateType.Error:
+                subject = "❌ Erro - " + subject;
+                template = LoadTemplate("Error.html")
+                    .Replace("{{titulo}}", subject)
+                    .Replace("{{mensagem}}", message)
+                    .Replace("{{link}}", link == "" ? "" : $"<a class=\"button\" href=\"{link}\" target=\"_blank\">Ver Detalhes</a>");
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(templateType), templateType, null);
+        }
+
+        var client = new SendGridClient(_sendGridConfig.ApiKey);
+        var from = new EmailAddress(_sendGridConfig.FromEmail, _sendGridConfig.FromName);
+        var to = new EmailAddress(toEmail);
+        var msg = MailHelper.CreateSingleEmail(from, to, subject, "", template);
+        var response = await client.SendEmailAsync(msg);
+
+        return response.StatusCode == System.Net.HttpStatusCode.OK || response.StatusCode == System.Net.HttpStatusCode.Accepted;
+    }
+    private static string LoadTemplate(string templateName)
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+        var resourceName = assembly.GetManifestResourceNames()
+            .FirstOrDefault(x => x.EndsWith($"Templates.{templateName}", StringComparison.InvariantCultureIgnoreCase));
+
+        if (resourceName == null)
+            throw new InvalidOperationException($"Template '{templateName}' não encontrado como recurso embutido.");
+
+        using var stream = assembly.GetManifestResourceStream(resourceName);
+        using var reader = new StreamReader(stream);
+        return reader.ReadToEnd();
+    }
+
+
 }

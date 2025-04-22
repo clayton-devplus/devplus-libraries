@@ -1,3 +1,4 @@
+using Devplus.Mail.Enum;
 using Devplus.Mail.Interfaces;
 using Devplus.TestApp.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -29,7 +30,14 @@ public class TestMessageController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> SendMail()
     {
-        await _emailService.SendEmailAsync();
-        return Ok("Message sent");
+        await _emailService.SendTemplateEmail("clayton@devplus.com.br", "Integração com a API de Pagamento",
+                        "Integração com a API de Pagamentos realizada com sucesso");
+
+        await _emailService.SendTemplateEmail("clayton@devplus.com.br", "Alta Latência da API",
+                        "O sistema está com alta latência de comunicação com a API de pagamentos.\n Melhor Verificar", templateType: EmailTemplateType.Warning);
+
+        await _emailService.SendTemplateEmail("clayton@devplus.com.br", "Falha na Comunicação da API",
+                         "O sistema falhou em comunicar com a API de pagamento", templateType: EmailTemplateType.Error);
+        return Ok();
     }
 }
