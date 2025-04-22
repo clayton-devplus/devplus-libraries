@@ -79,6 +79,45 @@ public class TemplateEmailExample
 }
 ```
 
+### 📎 **Enviando Emails com Anexos**
+
+```csharp
+using System.Text;
+using Devplus.Mail.Interfaces;
+using Devplus.Mail.Models;
+
+public class EmailWithAttachmentExample
+{
+    private readonly IEmailService _emailService;
+
+    public EmailWithAttachmentExample(IEmailService emailService)
+    {
+        _emailService = emailService;
+    }
+
+    public async Task SendEmailWithAttachment()
+    {
+        var csvContent = "Nome,Email,Idade\nClayton,clayton@devplus.com.br,30\nMaria,maria@devplus.com.br,25";
+        var csvBytes = Encoding.UTF8.GetBytes(csvContent);
+        var csvAttachment = new EmailAttachment
+        {
+            FileName = "usuarios.csv",
+            MimeType = "text/csv",
+            Disposition = "attachment",
+            ContentStream = new MemoryStream(csvBytes),
+        };
+
+        await _emailService.SendEmailAsync(
+            toEmail: "example@domain.com",
+            subject: "Relatório de Usuários",
+            plainTextContent: "Segue em anexo o relatório de usuários.",
+            htmlContent: "<strong>Segue em anexo o relatório de usuários.</strong>",
+            attachments: new[] { csvAttachment }
+        );
+    }
+}
+```
+
 ---
 
 ## 🔧 **Configuração via `appsettings.json`**
@@ -123,7 +162,8 @@ builder.Services.AddMail(configuration);
 ✅ **Injeção de dependência** via `IServiceCollection`.  
 ✅ **Configuração via `appsettings.json`**.  
 ✅ Compatível com **.NET 6, .NET 7 e .NET 8**.  
-✅ Suporte a **templates de email** embutidos.
+✅ Suporte a **templates de email** embutidos.  
+✅ Envio de **anexos** em emails.
 
 ---
 
