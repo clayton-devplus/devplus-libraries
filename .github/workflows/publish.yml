@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "Devplus.Messaging-v*"
+      - "Devplus.Mail-v*"
       - "Devplus.Logging-v*"
       - "Devplus.Caching-v*"
       - "Devplus.Security-v*"
@@ -38,6 +39,8 @@ jobs:
 
           if [[ "$TAG_NAME" == Devplus.Messaging-v* ]]; then
               dotnet pack Devplus.Messaging/Devplus.Messaging.csproj --configuration Release --output out/
+          if [[ "$TAG_NAME" == Devplus.Mail-v* ]]; then
+              dotnet pack Devplus.Mail/Devplus.Mail.csproj --configuration Release --output out/              
           elif [[ "$TAG_NAME" == Devplus.Logging-v* ]]; then
               dotnet pack Devplus.Logging/Devplus.Logging.csproj --configuration Release --output out/
           elif [[ "$TAG_NAME" == Devplus.Caching-v* ]]; then

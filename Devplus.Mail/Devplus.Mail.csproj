@@ -8,7 +8,7 @@
     <Version>1.0.0</Version>
     <Authors>Devplus</Authors>
     <Company>Devplus Consultoria</Company>
-    <Description>Biblioteca para envio de emails com SengGrid.</Description>
+    <Description>Biblioteca para envio de emails com SendGrid.</Description>
     <RepositoryUrl>https://github.com/clayton-devplus/devplus-libraries</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>     
