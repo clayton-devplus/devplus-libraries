@@ -11,38 +11,35 @@ public class RabbitMqPublisher : IMessagingPublisher
 {
     private readonly IConnection _connection;
     private readonly ILogger<RabbitMqPublisher> _logger;
+    private readonly IModel _channel; // Reutilizar o canal
+
     public RabbitMqPublisher(IConnection connection, ILogger<RabbitMqPublisher> logger)
     {
         _logger = logger;
         _connection = connection;
+        _channel = _connection.CreateModel(); // Criar o canal uma vez
     }
 
     public Task PublishAsync<T>(string exchangeName, T message, string typeEvent,
-                                                                string source,
-                                                                string messageId = "",
-                                                                string routingKey = "")
+                                string source, string messageId = "", string routingKey = "")
     {
-
         if (string.IsNullOrEmpty(messageId))
         {
             messageId = Guid.NewGuid().ToString();
         }
 
-
         try
         {
-            using var channel = _connection.CreateModel();
-
-            channel.ExchangeDeclare(exchange: exchangeName,
-                                        type: "topic",
-                                        durable: true,
-                                        autoDelete: false,
-                                        arguments: null);
+            _channel.ExchangeDeclare(exchange: exchangeName,
+                                     type: "topic",
+                                     durable: true,
+                                     autoDelete: false,
+                                     arguments: null);
 
             var cloudEvent = new CloudEvent<T>
             {
                 SpecVersion = "1.0",
-                Id = messageId.ToString(),
+                Id = messageId,
                 Source = source,
                 Type = typeEvent,
                 Time = DateTimeOffset.UtcNow,
@@ -56,10 +53,13 @@ public class RabbitMqPublisher : IMessagingPublisher
                 PropertyNameCaseInsensitive = true
             }));
 
-            channel.BasicPublish(
+            var properties = _channel.CreateBasicProperties();
+            properties.Persistent = true; // Garantir persistência da mensagem
+
+            _channel.BasicPublish(
                 exchange: exchangeName,
                 routingKey: routingKey,
-                basicProperties: null,
+                basicProperties: properties,
                 body: body);
         }
         catch (Exception ex)
@@ -69,5 +69,11 @@ public class RabbitMqPublisher : IMessagingPublisher
         }
 
         return Task.CompletedTask;
+    }
+
+    public void Dispose()
+    {
+        _channel?.Dispose(); // Garantir que o canal seja descartado corretamente
+        _connection?.Dispose();
     }
 }
