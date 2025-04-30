@@ -12,6 +12,7 @@ on:
 
 jobs:
   publish:
+    name: Publicar Pacote NuGet
     runs-on: ubuntu-latest
 
     steps:
