@@ -11,13 +11,13 @@ public class RabbitMqPublisher : IMessagingPublisher
 {
     private readonly IConnection _connection;
     private readonly ILogger<RabbitMqPublisher> _logger;
-    private readonly IModel _channel; // Reutilizar o canal
+    //private readonly IModel _channel; // Reutilizar o canal
 
     public RabbitMqPublisher(IConnection connection, ILogger<RabbitMqPublisher> logger)
     {
         _logger = logger;
         _connection = connection;
-        _channel = _connection.CreateModel(); // Criar o canal uma vez
+        //_channel = _connection.CreateModel(); // Criar o canal uma vez
     }
 
     public Task PublishAsync<T>(string exchangeName, T message, string typeEvent,
@@ -30,7 +30,8 @@ public class RabbitMqPublisher : IMessagingPublisher
 
         try
         {
-            _channel.ExchangeDeclare(exchange: exchangeName,
+            using var channel = _connection.CreateModel();
+            channel.ExchangeDeclare(exchange: exchangeName,
                                      type: "topic",
                                      durable: true,
                                      autoDelete: false,
@@ -53,10 +54,10 @@ public class RabbitMqPublisher : IMessagingPublisher
                 PropertyNameCaseInsensitive = true
             }));
 
-            var properties = _channel.CreateBasicProperties();
+            var properties = channel.CreateBasicProperties();
             properties.Persistent = true; // Garantir persistência da mensagem
 
-            _channel.BasicPublish(
+            channel.BasicPublish(
                 exchange: exchangeName,
                 routingKey: routingKey,
                 basicProperties: properties,
@@ -72,11 +73,5 @@ public class RabbitMqPublisher : IMessagingPublisher
         }
 
         return Task.CompletedTask;
-    }
-
-    public void Dispose()
-    {
-        _channel?.Dispose(); // Garantir que o canal seja descartado corretamente
-        _connection?.Dispose();
     }
 }
