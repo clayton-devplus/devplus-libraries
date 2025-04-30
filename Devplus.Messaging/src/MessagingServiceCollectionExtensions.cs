@@ -23,6 +23,8 @@ public static class MessagingServiceCollectionExtensions
 
         services.AddSingleton<IConnectionFactory>(factory);
         services.AddSingleton(sp => factory.CreateConnection());
+        services.AddSingleton(rabbitMqConfig);
+
         services.AddScoped<IMessagingPublisher, RabbitMqPublisher>();
         services.AddHostedService<RabbitMqHostedService>();
         return services;

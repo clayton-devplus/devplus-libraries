@@ -61,6 +61,9 @@ public class RabbitMqPublisher : IMessagingPublisher
                 routingKey: routingKey,
                 basicProperties: properties,
                 body: body);
+
+            _logger.LogInformation("Message publish - Exchange: {Exchange}, RoutingKey: {RoutingKey}, MessageId: {MessageId}",
+                exchangeName, routingKey, messageId);
         }
         catch (Exception ex)
         {

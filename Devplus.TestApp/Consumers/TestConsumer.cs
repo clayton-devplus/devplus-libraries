@@ -14,7 +14,7 @@ public class TestConsumer : IMessagingConsumer
     public Task ConsumeAsync(CloudEvent<object> cloudEvent, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Received message: {Message}", cloudEvent.Data);
-        throw new Exception("Simulated exception for testing purposes.");
+        //throw new Exception("Simulated exception for testing purposes.");
         return Task.CompletedTask;
     }
 }
