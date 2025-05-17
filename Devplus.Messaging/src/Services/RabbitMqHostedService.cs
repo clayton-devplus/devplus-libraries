@@ -151,7 +151,9 @@ namespace Devplus.Messaging.Services
                         _logger.LogInformation("Message received Queue: {QueueName} Consumer: {Consumer}", queueName, consumerType.Name);
 
                         using var messageScope = _scopeFactory.CreateScope();
-                        var scopedConsumer = messageScope.ServiceProvider.GetRequiredService(consumerType);
+                        var scopedConsumer = messageScope.ServiceProvider
+                                                        .GetServices<IMessagingConsumer>()
+                                                        .FirstOrDefault(c => c.GetType() == consumerType);
 
                         if (scopedConsumer is IMessagingConsumer typedConsumer)
                         {
