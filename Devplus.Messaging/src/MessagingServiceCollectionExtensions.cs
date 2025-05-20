@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
 
 namespace Devplus.Messaging;
+
 public static class MessagingServiceCollectionExtensions
 {
     public static IServiceCollection AddMessaging(this IServiceCollection services, IConfiguration configuration)
@@ -14,7 +15,8 @@ public static class MessagingServiceCollectionExtensions
 
         var factory = new ConnectionFactory
         {
-            Uri = new Uri(rabbitMqConfig.Host),
+            HostName = rabbitMqConfig.Host,
+            Port = rabbitMqConfig.Port,
             UserName = rabbitMqConfig.UserName,
             Password = rabbitMqConfig.Password,
             VirtualHost = rabbitMqConfig.VHost
