@@ -14,6 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Devplus.Messaging\Devplus.Messaging.csproj" />
     <ProjectReference Include="..\Devplus.Mail\Devplus.Mail.csproj" />
+    <ProjectReference Include="..\Devplus.Security\Devplus.Security.csproj" />
   </ItemGroup>
 
 </Project>

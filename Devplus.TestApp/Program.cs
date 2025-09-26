@@ -1,10 +1,12 @@
 using Devplus.Mail;
 using Devplus.Messaging;
+using Devplus.Security;
 using Devplus.Messaging.Interfaces;
 using Devplus.TestApp.Consumers;
 using Devplus.TestApp.Interfaces;
 using Devplus.TestApp.Services;
 using Microsoft.OpenApi.Models;
+using Devplus.Security.AspNetCore.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +17,7 @@ builder.Services.AddScoped<IMessagingConsumer, TestConsumer>();
 builder.Services.AddScoped<TestConsumer>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddControllers();
+builder.Services.AddDevplusSecurity(builder.Configuration);
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
