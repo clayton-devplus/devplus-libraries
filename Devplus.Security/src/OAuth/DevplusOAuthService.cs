@@ -7,13 +7,22 @@ public class DevplusOAuthService : IOAuthService
 {
     private readonly IDevplusOAuthLogoutService _devplusOAuthLogoutService;
     private readonly IDevplusOAuthService _devplusOAuthService;
+    private readonly IDevplusOAuthUserService _devplusOAuthUserService;
 
     public DevplusOAuthService(IDevplusOAuthService devplusOAuthService,
-                               IDevplusOAuthLogoutService devplusOAuthLogoutService)
+                               IDevplusOAuthLogoutService devplusOAuthLogoutService,
+                               IDevplusOAuthUserService devplusOAuthUserService)
     {
         _devplusOAuthService = devplusOAuthService;
         _devplusOAuthLogoutService = devplusOAuthLogoutService;
+        _devplusOAuthUserService = devplusOAuthUserService;
     }
+
+    public Task CreateClientAppUser(CreateClientAppRequestDto request)
+    {
+        return _devplusOAuthUserService.CreateUser(request);
+    }
+
     public async Task<Token> GetTokenAsync(TokenRequestDto tokenRequest)
     {
         return await _devplusOAuthService.GetTokenAsync(tokenRequest);
@@ -32,6 +41,11 @@ public class DevplusOAuthService : IOAuthService
     public async Task<Token> RefreshToken(RefreshTokenOAuthRequestDto refreshTokenRequest)
     {
         return await _devplusOAuthService.RefreshToken(refreshTokenRequest);
+    }
+
+    public Task RemoveClientAppUser(RemoveClientAppRequestDto request)
+    {
+        return _devplusOAuthUserService.RemoveUser(request);
     }
 
     public async Task<Token> RequestPasswordRecovery(PasswordRecoveryRequestDto passwordRecoveryRequestDto)

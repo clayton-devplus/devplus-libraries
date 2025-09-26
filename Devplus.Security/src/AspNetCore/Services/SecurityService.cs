@@ -80,4 +80,14 @@ public sealed class SecurityService : ISecurityService
 
     public void AddClaim(string type, string value)
         => (_accessor.HttpContext?.User.Identity as ClaimsIdentity)?.AddClaim(new Claim(type, value));
+
+    public Task CreateClientAppUser(CreateClientAppRequestDto request)
+    {
+        return _oauth.CreateClientAppUser(request);
+    }
+
+    public Task RemoveClientAppUser(RemoveClientAppRequestDto request)
+    {
+        return _oauth.RemoveClientAppUser(request);
+    }
 }

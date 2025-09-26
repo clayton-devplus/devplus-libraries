@@ -8,5 +8,7 @@ public interface IOAuthService
     Task<Token> PasswordReset(PasswordResetRequestDto passwordResetDto);
     Task<Token> RequestPasswordRecovery(PasswordRecoveryRequestDto passwordRecoveryRequestDto);
     Task Logout(RefreshTokenOAuthRequestDto refreshTokenRequest);
+    Task CreateClientAppUser(CreateClientAppRequestDto request);
+    Task RemoveClientAppUser(RemoveClientAppRequestDto request);
 
 }

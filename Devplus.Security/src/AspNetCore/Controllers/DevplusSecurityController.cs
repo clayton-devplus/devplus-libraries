@@ -62,4 +62,18 @@ public class DevplusSecurityController : ControllerBase
         HttpContext.Response.Headers.Add("Bearer", token.AccessToken);
         return Ok(token);
     }
+    [Authorize]
+    [HttpPost("create-client-app-user")]
+    public async Task<IActionResult> CreateClientAppUser([FromBody] CreateClientAppRequestDto dto)
+    {
+        await _security.CreateClientAppUser(dto);
+        return Created();
+    }
+    [Authorize]
+    [HttpPost("remove-client-app-user")]
+    public async Task<IActionResult> RemoveClientAppUser([FromBody] RemoveClientAppRequestDto dto)
+    {
+        await _security.RemoveClientAppUser(dto);
+        return NoContent();
+    }
 }

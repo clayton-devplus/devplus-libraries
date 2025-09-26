@@ -30,6 +30,14 @@ public static class DevplusOAuthServiceCollectionExtensions
             .AddHttpMessageHandler<OAuthAccessTokenHandler>()
             .AddPolicyHandler(GetRetryPolicy());
 
+        services.AddRefitClient<IDevplusOAuthUserService>()
+            .ConfigureHttpClient(c =>
+            {
+                c.BaseAddress = new Uri(configuration["OAuthSettings:Url"] ?? "");
+            })
+            .AddHttpMessageHandler<OAuthAccessTokenHandler>()
+            .AddPolicyHandler(GetRetryPolicy());
+
         return services;
     }
     private static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
