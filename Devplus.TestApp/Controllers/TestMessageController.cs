@@ -3,6 +3,7 @@ using Devplus.Mail.Enum;
 using Devplus.Mail.Interfaces;
 using Devplus.Mail.Models;
 using Devplus.TestApp.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Devplus.TestApp.Controllers;
@@ -28,6 +29,7 @@ public class TestMessageController : ControllerBase
         return Ok("Message sent");
     }
     [HttpGet("send-mail")]
+    [Authorize]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> SendMail()

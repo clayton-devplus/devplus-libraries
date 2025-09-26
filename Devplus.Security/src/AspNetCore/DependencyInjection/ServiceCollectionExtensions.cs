@@ -25,6 +25,11 @@ public static class ServiceCollectionExtensions
                 .AddApplicationPart(typeof(Security.AspNetCore.Controllers.DevplusSecurityController).Assembly)
                 .AddControllersAsServices();
 
+        if (!string.IsNullOrWhiteSpace(cfg["Jwt:Key"]))
+        {
+            services.AddDevplusJwtFromLegacyKeys(cfg);
+        }
+
         return services;
     }
 }

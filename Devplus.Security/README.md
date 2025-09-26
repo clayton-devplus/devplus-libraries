@@ -3,16 +3,17 @@
 [![NuGet](https://img.shields.io/nuget/v/Devplus.Security.svg)](https://www.nuget.org/packages/Devplus.Security/)
 [![Downloads](https://img.shields.io/nuget/dt/Devplus.Security.svg)](https://www.nuget.org/packages/Devplus.Security/)
 
-**Devplus.Security** é uma biblioteca .NET que simplifica a implementação de autenticação e autorização OAuth em suas aplicações, gerando automaticamente controllers e endpoints necessários.
+**Devplus.Security** é uma biblioteca .NET que fornece funcionalidades de autenticação e autorização OAuth com endpoints pré-configurados e integração JWT, eliminando a necessidade de criar repetitivamente controllers de autenticação em suas aplicações.
 
 ## ✨ **Características**
 
-- 🔐 **Autenticação OAuth automática**
-- 🎛️ **Geração automática de controllers**
-- 🔑 **Validação de tokens JWT**
+- 🔐 **OAuth Service integrado com Refit**
+- 🎛️ **Controller de segurança pré-configurado**
+- 🔑 **Autenticação JWT Bearer (Legacy)**
 - ⚙️ **Configuração via appsettings.json**
-- 🚀 **Integração simples com DI**
-- 📦 **Middleware personalizável**
+- 🚀 **Integração automática com DI**
+- 📦 **HttpClient com Polly para retry automático**
+- 🔒 **Endpoints de login, logout, refresh token e recuperação de senha**
 
 ## 📦 **Instalação**
 
@@ -27,13 +28,17 @@ dotnet add package Devplus.Security
 ```json
 {
   "OAuthSettings": {
-    "IdentityServerUrl": "https://seu-oauth-server.com",
-    "IdentityClientId": "your-client-id-guid",
-    "IdentityClientSecret": "your-client-secret",
-    "RequireHttps": true,
-    "TokenEndpoint": "/oauth/token",
-    "ValidateToken": true,
-    "AutoGenerateControllers": true
+    "Url": "https://seu-oauth-server.com",
+    "ClientId": "your-client-id",
+    "ClientSecret": "your-client-secret",
+    "IdentityClientId": "your-identity-client-id-guid",
+    "IdentityClientSecret": "your-identity-client-secret",
+    "PasswordRecoveryRedirectUrl": "https://sua-app.com/reset-password"
+  },
+  "Jwt": {
+    "Issuer": "https://sua-app.com",
+    "Audience": "sua-audience",
+    "Key": "sua-chave-secreta-jwt-muito-longa-e-segura"
   }
 }
 ```
@@ -41,150 +46,282 @@ dotnet add package Devplus.Security
 ### 2. Configurar no Program.cs
 
 ```csharp
-using Devplus.Security.Extensions;
+using Devplus.Security.AspNetCore.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Adicionar Devplus Security
+// Adicionar Devplus Security (registra tudo automaticamente)
 builder.Services.AddDevplusSecurity(builder.Configuration);
 
 var app = builder.Build();
 
-// Usar Devplus Security Middleware
-app.UseDevplusSecurity();
+// Configurar pipeline de autenticação
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
 
 app.Run();
 ```
 
-## 🚀 **Uso Básico**
+## 🚀 **Endpoints Gerados Automaticamente**
 
-### Controllers Gerados Automaticamente
+A biblioteca gera automaticamente o controller `DevplusSecurityController` com os seguintes endpoints:
 
-A biblioteca gera automaticamente os seguintes endpoints:
+| Método | Endpoint                                     | Descrição                      |
+| ------ | -------------------------------------------- | ------------------------------ |
+| `POST` | `/api/v1/security/login`                     | Login com usuário e senha      |
+| `POST` | `/api/v1/security/refresh-token`             | Renovar token de acesso        |
+| `POST` | `/api/v1/security/password-recovery-request` | Solicitar recuperação de senha |
+| `POST` | `/api/v1/security/password-reset`            | Redefinir senha com token      |
+| `POST` | `/api/v1/security/logout`                    | Logout (requer autenticação)   |
 
+### Exemplos de Uso dos Endpoints
+
+#### Login
+
+```json
+POST /api/v1/security/login
+{
+  "nomeUsuario": "usuario@exemplo.com",
+  "senha": "minhasenha123"
+}
+
+// Resposta
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "tokenType": "Bearer",
+  "expiresIn": 3600,
+  "refreshToken": "def502004b8c4...",
+  "scope": "read write"
+}
 ```
-POST /api/oauth/token          - Obter token de acesso
-POST /api/oauth/refresh        - Renovar token
-POST /api/oauth/validate       - Validar token
-DELETE /api/oauth/revoke       - Revogar token
+
+#### Refresh Token
+
+```json
+POST /api/v1/security/refresh-token
+{
+  "refreshToken": "def502004b8c4..."
+}
 ```
 
-### Usando em Controllers Personalizados
+#### Recuperação de Senha
+
+```json
+POST /api/v1/security/password-recovery-request
+{
+  "email": "usuario@exemplo.com"
+}
+```
+
+#### Reset de Senha
+
+```json
+POST /api/v1/security/password-reset
+{
+  "token": "reset-token-recebido-por-email",
+  "newPassword": "novaSenha123"
+}
+```
+
+## 🔧 **Serviços Injetáveis**
+
+### IOAuthService
+
+```csharp
+public class MinhaApiService
+{
+    private readonly IOAuthService _oauthService;
+
+    public MinhaApiService(IOAuthService oauthService)
+    {
+        _oauthService = oauthService;
+    }
+
+    public async Task<Token> FazerLogin()
+    {
+        var tokenRequest = new TokenRequestDto
+        {
+            // configurar dados do request
+        };
+
+        return await _oauthService.GetTokenAsync(tokenRequest);
+    }
+}
+```
+
+### ISecurityService
+
+```csharp
+public class MinhaLogicaService
+{
+    private readonly ISecurityService _securityService;
+
+    public MinhaLogicaService(ISecurityService securityService)
+    {
+        _securityService = securityService;
+    }
+
+    public async Task<Token> AutenticarUsuario(string email, string senha)
+    {
+        var loginDto = new UserLoginDto
+        {
+            NomeUsuario = email,
+            Senha = senha
+        };
+
+        return await _securityService.AuthorizeUser(loginDto);
+    }
+}
+```
+
+## � **Usando em Controllers Personalizados**
 
 ```csharp
 [ApiController]
 [Route("api/[controller]")]
-[OAuthAuthorize] // Atributo personalizado da biblioteca
-public class WeatherController : ControllerBase
+[Authorize] // Utiliza a autenticação JWT configurada
+public class MeuController : ControllerBase
 {
     [HttpGet]
     public IActionResult Get()
     {
-        // Acesso aos claims do usuário autenticado
-        var userId = HttpContext.GetUserId();
-        var userRoles = HttpContext.GetUserRoles();
+        // Acesso aos dados do usuário autenticado
+        var userId = User.FindFirst("sub")?.Value;
+        var userName = User.Identity?.Name;
 
         return Ok(new { Message = "Acesso autorizado!", UserId = userId });
     }
 }
 ```
 
-### Configuração Avançada
+## 📋 **DTOs e Models**
+
+### Token
 
 ```csharp
-builder.Services.AddDevplusSecurity(builder.Configuration, options =>
+public class Token
 {
-    options.EnableSwaggerAuth = true;
-    options.CustomScopes = new[] { "read", "write", "admin" };
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuerSigningKey = true,
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ClockSkew = TimeSpan.Zero
-    };
-});
-```
-
-## 🔧 **Serviços Injetáveis**
-
-```csharp
-public class MyService
-{
-    private readonly IOAuthService _oauthService;
-    private readonly ITokenValidator _tokenValidator;
-
-    public MyService(IOAuthService oauthService, ITokenValidator tokenValidator)
-    {
-        _oauthService = oauthService;
-        _tokenValidator = tokenValidator;
-    }
-
-    public async Task<string> GetTokenAsync()
-    {
-        var token = await _oauthService.GetAccessTokenAsync();
-        return token.AccessToken;
-    }
-
-    public async Task<bool> ValidateTokenAsync(string token)
-    {
-        return await _tokenValidator.ValidateAsync(token);
-    }
+    public string AccessToken { get; set; }
+    public string TokenType { get; set; }
+    public int ExpiresIn { get; set; }
+    public string RefreshToken { get; set; }
+    public string Scope { get; set; }
 }
 ```
 
-## 📋 **Exemplos de Uso**
-
-### Autenticação Client Credentials
+### UserLoginDto
 
 ```csharp
-var tokenRequest = new TokenRequestDto
+public class UserLoginDto
 {
-    GrantType = "client_credentials",
-    ClientId = Guid.Parse("your-client-id"),
-    ClientSecret = "your-client-secret"
-};
-
-var token = await oauthService.GetTokenAsync(tokenRequest);
+    public string? NomeUsuario { get; set; }
+    public string? Senha { get; set; }
+}
 ```
 
-### Middleware Personalizado
+## ⚡ **Funcionalidades Técnicas**
 
-```csharp
-app.UseDevplusSecurity(options =>
+### HttpClient com Retry (Polly)
+
+A biblioteca configura automaticamente retry policies para chamadas HTTP:
+
+- 6 tentativas com backoff exponencial
+- Tratamento automático de erros transitórios
+- Timeout e circuit breaker
+
+### OAuthAccessTokenHandler
+
+Handler automático que adiciona tokens de acesso client_credentials nas requisições para serviços externos.
+
+### Autenticação JWT Legacy
+
+Suporte a configuração JWT simples com chaves diretas no appsettings:
+
+```json
 {
-    options.OnTokenValidated = context =>
-    {
-        // Lógica personalizada após validação do token
-        var claims = context.Principal.Claims;
-        // ...
-    };
-
-    options.OnAuthenticationFailed = context =>
-    {
-        // Lógica personalizada para falhas de autenticação
-        context.Response.StatusCode = 401;
-        // ...
-    };
-});
+  "Jwt": {
+    "Issuer": "https://meuapp.com",
+    "Audience": "minha-api",
+    "Key": "minha-chave-super-secreta-de-pelo-menos-256-bits"
+  }
+}
 ```
 
-## 🧪 **Testes**
+## 🏗️ **Arquitetura**
+
+```
+Devplus.Security/
+├── src/
+│   ├── AspNetCore/
+│   │   ├── Controllers/
+│   │   │   └── DevplusSecurityController.cs
+│   │   ├── DependencyInjection/
+│   │   │   ├── ServiceCollectionExtensions.cs
+│   │   │   └── LegacyJwtAuthenticationExtensions.cs
+│   │   └── Services/
+│   │       ├── ISecurityService.cs
+│   │       └── SecurityService.cs
+│   └── OAuth/
+│       ├── Contracts/
+│       │   ├── IOAuthService.cs
+│       │   ├── Token.cs
+│       │   ├── UserLoginDto.cs
+│       │   └── ...
+│       ├── Refit/
+│       │   ├── IDevplusOAuthService.cs
+│       │   └── IDevplusOAuthLogoutService.cs
+│       ├── DevplusOAuthService.cs
+│       ├── OAuthAccessTokenHandler.cs
+│       ├── OAuthSettings.cs
+│       └── DevplusOAuthServiceCollectionExtensions.cs
+```
+
+## 🧪 **Exemplo de Implementação Completa**
 
 ```csharp
-// Exemplo de teste unitário
-[Test]
-public async Task Should_Generate_Token_Successfully()
+// Program.cs
+using Devplus.Security.AspNetCore.DependencyInjection;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllers();
+builder.Services.AddDevplusSecurity(builder.Configuration);
+
+var app = builder.Build();
+
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
+
+app.Run();
+
+// MeuController.cs
+[ApiController]
+[Route("api/[controller]")]
+public class MeuController : ControllerBase
 {
-    // Arrange
-    var oauthService = serviceProvider.GetService<IOAuthService>();
+    private readonly ISecurityService _securityService;
 
-    // Act
-    var token = await oauthService.GetAccessTokenAsync();
+    public MeuController(ISecurityService securityService)
+    {
+        _securityService = securityService;
+    }
 
-    // Assert
-    Assert.IsNotNull(token.AccessToken);
-    Assert.IsTrue(token.ExpiresIn > 0);
+    [HttpPost("custom-login")]
+    public async Task<IActionResult> CustomLogin([FromBody] UserLoginDto dto)
+    {
+        try
+        {
+            var token = await _securityService.AuthorizeUser(dto);
+            return Ok(token);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Unauthorized();
+        }
+    }
 }
 ```
 
