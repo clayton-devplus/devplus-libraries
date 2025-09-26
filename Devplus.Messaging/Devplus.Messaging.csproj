@@ -6,12 +6,15 @@
     <Nullable>enable</Nullable>
     <PackageId>Devplus.Messaging</PackageId>
     <Version>2.7.4</Version>
-    <Authors>Devplus</Authors>
+    <Authors>Clayton Oliveira</Authors>
     <Company>Devplus Consultoria</Company>
     <Description>Biblioteca para mensageria com RabbitMQ.</Description>
+    <Copyright>Copyright © 2025 Devplus Consultoria</Copyright>
     <RepositoryUrl>https://github.com/clayton-devplus/devplus-libraries</RepositoryUrl>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>rabbitmq;messaging;dotnet;devplus</PackageTags>    
     <PackageReadmeFile>README.md</PackageReadmeFile>    
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>

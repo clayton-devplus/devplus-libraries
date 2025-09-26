@@ -12,8 +12,7 @@
     <Product>Devplus.Libraries</Product>
     <Description>Módulo de segurança para JWT, OAuth e proteção de APIs com geração automática de controllers OAuth</Description>
     <Copyright>Copyright © 2025 Devplus Consultoria</Copyright>
-    <PackageProjectUrl>https://github.com/claytonoliveiradev/devplus-libraries</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/claytonoliveiradev/devplus-libraries</RepositoryUrl>
+    <RepositoryUrl>https://github.com/clayton-devplus/devplus-libraries</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>oauth;jwt;security;authentication;authorization;dotnet;devplus</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
