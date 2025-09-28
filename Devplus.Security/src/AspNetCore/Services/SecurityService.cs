@@ -85,9 +85,9 @@ public sealed class SecurityService : ISecurityService
     {
         return _oauth.CreateClientAppUser(request);
     }
-
     public Task RemoveClientAppUser(RemoveClientAppRequestDto request)
     {
         return _oauth.RemoveClientAppUser(request);
     }
+
 }

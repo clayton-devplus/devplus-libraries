@@ -27,8 +27,8 @@ public class OAuthAccessTokenHandler : DelegatingHandler
         var tokenReq = new TokenRequestDto
         {
             GrantType = "client_credentials",
-            ClientId = Guid.Parse(s.IdentityClientId ?? throw new InvalidOperationException("OAuthSettings:IdentityClientId ausente")),
-            ClientSecret = s.IdentityClientSecret ?? throw new InvalidOperationException("OAuthSettings:IdentityClientSecret ausente")
+            ClientId = Guid.Parse(s.ClientId ?? throw new InvalidOperationException("OAuthSettings:ClientId ausente")),
+            ClientSecret = s.ClientSecret ?? throw new InvalidOperationException("OAuthSettings:ClientSecret ausente")
         };
 
         var tokenRes = await _refit.GetTokenAsync(tokenReq);

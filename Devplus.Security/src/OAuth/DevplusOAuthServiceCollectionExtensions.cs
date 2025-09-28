@@ -22,13 +22,6 @@ public static class DevplusOAuthServiceCollectionExtensions
             })
             .AddPolicyHandler(GetRetryPolicy());
 
-        services.AddRefitClient<IDevplusOAuthLogoutService>()
-            .ConfigureHttpClient(c =>
-            {
-                c.BaseAddress = new Uri(configuration["OAuthSettings:Url"] ?? "");
-            })
-            .AddHttpMessageHandler<OAuthAccessTokenHandler>()
-            .AddPolicyHandler(GetRetryPolicy());
 
         services.AddRefitClient<IDevplusOAuthUserService>()
             .ConfigureHttpClient(c =>

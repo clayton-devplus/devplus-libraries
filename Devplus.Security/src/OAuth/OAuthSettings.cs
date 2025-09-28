@@ -9,8 +9,8 @@ public sealed class OAuthSettings
     public string? ClientSecret { get; init; }
 
     // client_credentials p/ chamadas de serviço (delegating handler)
-    public string? IdentityClientId { get; init; }
-    public string? IdentityClientSecret { get; init; }
+    // public string? IdentityClientId { get; init; }
+    // public string? IdentityClientSecret { get; init; }
 
     // password recovery
     public string? PasswordRecoveryRedirectUrl { get; init; }

@@ -5,16 +5,13 @@ namespace Devplus.Security.OAuth;
 
 public class DevplusOAuthService : IOAuthService
 {
-    private readonly IDevplusOAuthLogoutService _devplusOAuthLogoutService;
     private readonly IDevplusOAuthService _devplusOAuthService;
     private readonly IDevplusOAuthUserService _devplusOAuthUserService;
 
     public DevplusOAuthService(IDevplusOAuthService devplusOAuthService,
-                               IDevplusOAuthLogoutService devplusOAuthLogoutService,
                                IDevplusOAuthUserService devplusOAuthUserService)
     {
         _devplusOAuthService = devplusOAuthService;
-        _devplusOAuthLogoutService = devplusOAuthLogoutService;
         _devplusOAuthUserService = devplusOAuthUserService;
     }
 
@@ -30,7 +27,7 @@ public class DevplusOAuthService : IOAuthService
 
     public async Task Logout(RefreshTokenOAuthRequestDto refreshTokenRequest)
     {
-        await _devplusOAuthLogoutService.Logout(refreshTokenRequest);
+        await _devplusOAuthUserService.Logout(refreshTokenRequest);
     }
 
     public async Task<Token> PasswordReset(PasswordResetRequestDto passwordResetDto)
