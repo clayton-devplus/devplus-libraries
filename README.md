@@ -2,6 +2,7 @@
 
 [![NuGet](https://img.shields.io/nuget/v/Devplus.Messaging.svg?label=Messaging)](https://www.nuget.org/packages/Devplus.Messaging/)
 [![NuGet](https://img.shields.io/nuget/v/Devplus.Mail.svg?label=Mail)](https://www.nuget.org/packages/Devplus.Mail/)
+[![NuGet](https://img.shields.io/nuget/v/Devplus.Security.svg?label=Security)](https://www.nuget.org/packages/Devplus.Security/)
 
 `Devplus.Libraries` é um conjunto de **bibliotecas .NET** criadas para facilitar o desenvolvimento de aplicações escaláveis, focando em **mensageria, logging, caching e segurança**.
 
