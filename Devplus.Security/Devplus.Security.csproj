@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>Devplus.Security</PackageId>
-    <PackageVersion>1.4.0</PackageVersion>
+    <PackageVersion>1.5.0</PackageVersion>
     <Authors>Clayton Oliveira</Authors>
     <Company>Devplus Consultoria</Company>
     <Product>Devplus.Libraries</Product>
