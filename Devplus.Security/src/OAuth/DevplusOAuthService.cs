@@ -15,7 +15,7 @@ public class DevplusOAuthService : IOAuthService
         _devplusOAuthUserService = devplusOAuthUserService;
     }
 
-    public Task CreateClientAppUser(CreateClientAppRequestDto request)
+    public Task<CreateClientAppResponseDto> CreateClientAppUser(CreateClientAppRequestDto request)
     {
         return _devplusOAuthUserService.CreateUser(request);
     }

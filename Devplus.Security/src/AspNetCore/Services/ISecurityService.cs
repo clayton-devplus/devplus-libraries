@@ -16,7 +16,7 @@ public interface ISecurityService
     Task<Token> ResetPassword(string resetToken, string newPassword);
     Task Logout(string refreshToken);
 
-    Task CreateClientAppUser(CreateClientAppRequestDto request);
+    Task<CreateClientAppResponseDto> CreateClientAppUser(CreateClientAppRequestDto request);
     Task RemoveClientAppUser(RemoveClientAppRequestDto request);
 
     void AddClaim(string type, string value);
