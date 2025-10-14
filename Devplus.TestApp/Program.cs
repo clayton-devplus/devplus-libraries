@@ -11,10 +11,11 @@ using Devplus.TestApp.Configuration;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddMessaging(builder.Configuration);
-builder.Services.AddMail(builder.Configuration);
 builder.Services.AddScoped<ITestMessageService, TestMessageService>();
 builder.Services.AddScoped<IMessagingConsumer, TestConsumer>();
 builder.Services.AddScoped<TestConsumer>();
+builder.Services.AddScoped<Devplus.TestApp.Services.DlqMonitorExampleService>();
+builder.Services.AddMail(builder.Configuration);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddControllers();
 builder.Services.AddDevplusSecurity(builder.Configuration);
@@ -29,4 +30,4 @@ app.UseSwaggerUI();
 app.MapControllers();
 app.UseAuthentication();
 app.UseAuthorization();
-app.Run();
+await app.RunAsync();

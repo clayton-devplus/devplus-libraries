@@ -9,9 +9,9 @@ namespace Devplus.Messaging;
 
 public static class MessagingServiceCollectionExtensions
 {
-    public static IServiceCollection AddMessaging(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddMessaging(this IServiceCollection services, IConfiguration configuration, bool RegisterConsumers = true)
     {
-        var rabbitMqConfig = configuration.GetSection("RabbitMq").Get<RabbitMqConfig>();
+        var rabbitMqConfig = configuration.GetSection("RabbitMq").Get<RabbitMqConfig>() ?? new RabbitMqConfig();
 
         var factory = new ConnectionFactory
         {
@@ -28,7 +28,11 @@ public static class MessagingServiceCollectionExtensions
         services.AddSingleton(rabbitMqConfig);
 
         services.AddScoped<IMessagingPublisher, RabbitMqPublisher>();
-        services.AddHostedService<RabbitMqHostedService>();
+        services.AddScoped<IMessagingRedrive, RabbitMqRedriveService>();
+
+        if (RegisterConsumers)
+            services.AddHostedService<RabbitMqHostedService>();
+
         return services;
     }
 }

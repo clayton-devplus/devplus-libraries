@@ -3,6 +3,7 @@ using Devplus.Messaging.Interfaces;
 using Devplus.Messaging.Models;
 
 namespace Devplus.TestApp.Consumers;
+
 public class TestConsumer : IMessagingConsumer
 {
     public string ExchangeName => "devplus-test-exchange";
@@ -14,7 +15,9 @@ public class TestConsumer : IMessagingConsumer
     public Task ConsumeAsync(CloudEvent<object> cloudEvent, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Received message: {Message}", cloudEvent.Data);
-        //throw new Exception("Simulated exception for testing purposes.");
+
+        throw new Exception("Erro ao processar a mensagem");
+
         return Task.CompletedTask;
     }
 }

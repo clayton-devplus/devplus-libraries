@@ -181,12 +181,28 @@ namespace Devplus.Messaging.Services
 
                         var dlqProps = channel.CreateBasicProperties();
                         dlqProps.Persistent = true;
-                        dlqProps.Headers = props.Headers;
+                        dlqProps.Headers = props.Headers ?? new Dictionary<string, object>();
 
-                        if (dlqProps.Headers == null)
-                            dlqProps.Headers = new Dictionary<string, object>();
-
+                        // Adicionar metadados úteis para redrive
                         dlqProps.Headers["x-send-dlq"] = Encoding.UTF8.GetBytes(DateTime.UtcNow.ToString("o"));
+                        dlqProps.Headers["x-original-exchange"] = Encoding.UTF8.GetBytes(exchangeName);
+                        dlqProps.Headers["x-original-routing-key"] = Encoding.UTF8.GetBytes(routingKey);
+                        dlqProps.Headers["x-failure-reason"] = Encoding.UTF8.GetBytes(ex.Message);
+                        dlqProps.Headers["x-consumer-type"] = Encoding.UTF8.GetBytes(consumerType.Name);
+
+                        // Adicionar MessageId se disponível no CloudEvent
+                        try
+                        {
+                            var cloudEventForId = JsonSerializer.Deserialize<CloudEvent<object>>(messageJson);
+                            if (cloudEventForId?.Id != null)
+                            {
+                                dlqProps.Headers["x-message-id"] = Encoding.UTF8.GetBytes(cloudEventForId.Id);
+                            }
+                        }
+                        catch
+                        {
+                            // Ignorar erro de deserialização para messageId
+                        }
 
                         channel.BasicPublish(exchange: dlxExchange, routingKey: "", basicProperties: dlqProps, body: body);
                         channel.BasicAck(args.DeliveryTag, false);

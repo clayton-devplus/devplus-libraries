@@ -10,6 +10,7 @@
 - 📬 **Publicação e consumo de mensagens** baseado no padrão **CloudEvents**
 - 🔄 **Sistema de retry automático** com configuração personalizável
 - 💀 **Dead Letter Queue (DLQ)** automática para mensagens falhas
+- 🔁 **Sistema de Redrive completo** para reprocessamento de mensagens DLQ
 - 🏗️ **Suporte a filas Quorum e Classic** do RabbitMQ
 - ⚙️ **Configuração flexível** via appsettings.json
 - 🚀 **Hosted Service integrado** para gerenciamento automático de consumidores
@@ -214,7 +215,10 @@ Quando uma mensagem é enviada para DLQ, os seguintes headers são adicionados:
 {
     "x-retry-count": "5",                           // Total de tentativas
     "x-last-process": "2025-09-28T10:30:00.000Z",   // Última tentativa
-    "x-send-dlq": "2025-09-28T10:30:05.000Z"        // Timestamp do envio para DLQ
+    "x-send-dlq": "2025-09-28T10:30:05.000Z",       // Timestamp do envio para DLQ
+    "x-failure-reason": "HttpRequestException",      // Motivo da falha
+    "x-original-exchange": "produtos-exchange",      // Exchange original
+    "x-original-routing-key": "produtos.criados"    // Routing key original
 }
 ```
 
@@ -238,7 +242,418 @@ public class DlqMonitorService
 - ✅ **Falhas de conexão** com APIs externas
 - ❌ **Erro de dados inválidos** (deve ser tratado sem throw)
 
-## 📋 **Modelos e Interfaces**
+## � **Sistema de Redrive**
+
+O **Sistema de Redrive** permite reprocessar mensagens que estão na Dead Letter Queue (DLQ), oferecendo controle total sobre recuperação de mensagens falhas.
+
+### 🎯 **Funcionalidades do Redrive**
+
+- 📋 **Listar mensagens** na DLQ com metadados completos
+- 🔄 **Reenviar mensagem específica** de volta para processamento
+- 🚀 **Reenviar todas as mensagens** da DLQ em lote
+- 🗑️ **Remover mensagem específica** permanentemente da DLQ
+- 🧹 **Limpar toda a DLQ** removendo todas as mensagens
+- ⚡ **Verificar contagem** de mensagens na DLQ de forma ultra-performática
+
+### 🔌 **Interface IMessagingRedrive**
+
+```csharp
+public interface IMessagingRedrive
+{
+    /// <summary>
+    /// Lista mensagens na Dead Letter Queue
+    /// </summary>
+    Task<IEnumerable<DeadLetterMessage>> GetDeadLetterMessagesAsync(string queueName, int maxMessages = 100);
+
+    /// <summary>
+    /// Reenvia uma mensagem específica da DLQ para a fila principal
+    /// </summary>
+    Task<bool> RedriveMessageAsync(string queueName, string messageId);
+
+    /// <summary>
+    /// Reenvia todas as mensagens da DLQ para a fila principal
+    /// </summary>
+    Task<int> RedriveAllMessagesAsync(string queueName, int maxMessages = 0);
+
+    /// <summary>
+    /// Remove uma mensagem específica da DLQ permanentemente
+    /// </summary>
+    Task<bool> PurgeDeadLetterMessageAsync(string queueName, string messageId);
+
+    /// <summary>
+    /// Limpa completamente uma DLQ (remove todas as mensagens)
+    /// </summary>
+    Task<int> PurgeDeadLetterQueueAsync(string queueName);
+}
+```
+
+### 📊 **Modelo DeadLetterMessage**
+
+```csharp
+public class DeadLetterMessage
+{
+    public string MessageId { get; set; }              // ID único da mensagem
+    public string Body { get; set; }                   // Conteúdo da mensagem
+    public Dictionary<string, object> Headers { get; set; } // Headers completos
+    public int RetryCount { get; set; }                // Número de tentativas realizadas
+    public DateTime LastProcessAttempt { get; set; }   // Última tentativa de processamento
+    public DateTime SentToDlqAt { get; set; }          // Quando foi enviada para DLQ
+    public string FailureReason { get; set; }          // Motivo da falha
+    public string OriginalExchange { get; set; }       // Exchange original
+    public string OriginalRoutingKey { get; set; }     // Routing key original
+    public string DlqName { get; set; }                // Nome da DLQ
+}
+```
+
+### 🔧 **Configuração do Redrive**
+
+```csharp
+// Program.cs
+var builder = WebApplication.CreateBuilder(args);
+
+// ✅ Registrar a biblioteca Messaging (inclui IMessagingRedrive automaticamente)
+builder.Services.AddMessaging(builder.Configuration);
+
+var app = builder.Build();
+app.Run();
+```
+
+### 📋 **Exemplos Práticos de Uso**
+
+#### 🔍 **1. Listar Mensagens na DLQ**
+
+```csharp
+public class DlqManagementService
+{
+    private readonly IMessagingRedrive _redrive;
+    private readonly ILogger<DlqManagementService> _logger;
+
+    public DlqManagementService(IMessagingRedrive redrive, ILogger<DlqManagementService> logger)
+    {
+        _redrive = redrive;
+        _logger = logger;
+    }
+
+    public async Task<List<DeadLetterMessage>> ListarMensagensDlq(string queueName)
+    {
+        try
+        {
+            // Listar até 50 mensagens na DLQ
+            var messages = await _redrive.GetDeadLetterMessagesAsync(queueName, maxMessages: 50);
+
+            _logger.LogInformation("Encontradas {Count} mensagens na DLQ da fila {QueueName}",
+                messages.Count(), queueName);
+
+            foreach (var message in messages)
+            {
+                _logger.LogInformation("Mensagem {MessageId}: {RetryCount} tentativas, falha: {FailureReason}",
+                    message.MessageId, message.RetryCount, message.FailureReason);
+            }
+
+            return messages.ToList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao listar mensagens da DLQ {QueueName}", queueName);
+            throw;
+        }
+    }
+}
+```
+
+#### 🔄 **2. Reenviar Mensagem Específica**
+
+```csharp
+public class RedriveService
+{
+    private readonly IMessagingRedrive _redrive;
+    private readonly ILogger<RedriveService> _logger;
+
+    public async Task<bool> ReenviarMensagem(string queueName, string messageId)
+    {
+        try
+        {
+            var success = await _redrive.RedriveMessageAsync(queueName, messageId);
+
+            if (success)
+            {
+                _logger.LogInformation("Mensagem {MessageId} reenviada com sucesso para {QueueName}",
+                    messageId, queueName);
+                return true;
+            }
+            else
+            {
+                _logger.LogWarning("Mensagem {MessageId} não encontrada na DLQ da fila {QueueName}",
+                    messageId, queueName);
+                return false;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao reenviar mensagem {MessageId} da DLQ {QueueName}",
+                messageId, queueName);
+            return false;
+        }
+    }
+}
+```
+
+#### 🚀 **3. Reenviar Todas as Mensagens**
+
+```csharp
+public async Task<int> ReenviarTodasMensagens(string queueName, int maxMessages = 100)
+{
+    try
+    {
+        // Reenviar até 100 mensagens da DLQ
+        var count = await _redrive.RedriveAllMessagesAsync(queueName, maxMessages);
+
+        _logger.LogInformation("{Count} mensagens reenviadas da DLQ para a fila {QueueName}",
+            count, queueName);
+
+        return count;
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Erro ao reenviar todas as mensagens da DLQ {QueueName}", queueName);
+        return 0;
+    }
+}
+```
+
+#### 🗑️ **4. Remover Mensagens da DLQ**
+
+```csharp
+public async Task<bool> RemoverMensagemPermanentemente(string queueName, string messageId)
+{
+    try
+    {
+        var success = await _redrive.PurgeDeadLetterMessageAsync(queueName, messageId);
+
+        if (success)
+        {
+            _logger.LogInformation("Mensagem {MessageId} removida permanentemente da DLQ {QueueName}",
+                messageId, queueName);
+        }
+
+        return success;
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Erro ao remover mensagem {MessageId} da DLQ {QueueName}",
+            messageId, queueName);
+        return false;
+    }
+}
+
+public async Task<int> LimparTodaDlq(string queueName)
+{
+    try
+    {
+        var count = await _redrive.PurgeDeadLetterQueueAsync(queueName);
+
+        _logger.LogWarning("DLQ da fila {QueueName} limpa completamente. {Count} mensagens removidas",
+            queueName, count);
+
+        return count;
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Erro ao limpar DLQ da fila {QueueName}", queueName);
+        return 0;
+    }
+}
+```
+
+#### ⚡ **5. Verificação Rápida de DLQ (Ultra-Performática)**
+
+```csharp
+public class DlqMonitorService
+{
+    private readonly IMessagingRedrive _redrive;
+    private readonly ILogger<DlqMonitorService> _logger;
+
+    /// <summary>
+    /// Verifica rapidamente se há mensagens na DLQ sem impacto na performance
+    /// </summary>
+    public async Task<bool> HasPendingMessages(string queueName)
+    {
+        // ⚡ Operação ultra-rápida - apenas consulta metadados (1-2ms)
+        var count = await _redrive.GetDeadLetterQueueMessageCountAsync(queueName);
+
+        if (count > 0)
+        {
+            _logger.LogWarning("DLQ {QueueName} contém {Count} mensagens pendentes",
+                queueName, count);
+        }
+
+        return count > 0;
+    }
+
+    /// <summary>
+    /// Monitoramento em tempo real de múltiplas DLQs
+    /// </summary>
+    public async Task<Dictionary<string, uint>> GetAllDlqCounts()
+    {
+        var queues = new[] { "pedidos-queue", "pagamentos-queue", "estoque-queue" };
+        var results = new Dictionary<string, uint>();
+
+        // Verifica todas as filas em paralelo para máxima performance
+        var tasks = queues.Select(async queue =>
+        {
+            var count = await _redrive.GetDeadLetterQueueMessageCountAsync(queue);
+            return new KeyValuePair<string, uint>(queue, count);
+        });
+
+        var counts = await Task.WhenAll(tasks);
+
+        foreach (var (queue, count) in counts)
+        {
+            results[queue] = count;
+
+            if (count > 50) // Threshold de alerta
+            {
+                _logger.LogError("🚨 DLQ crítica: {Queue} com {Count} mensagens", queue, count);
+            }
+        }
+
+        return results;
+    }
+}
+```
+
+### 🎛️ **Estratégias de Redrive**
+
+#### 📊 **1. Redrive Baseado em Análise**
+
+```csharp
+public class SmartRedriveService
+{
+    public async Task ExecutarRedriveInteligente(string queueName)
+    {
+        // 1. Analisar mensagens na DLQ
+        var messages = await _redrive.GetDeadLetterMessagesAsync(queueName, 1000);
+
+        // 2. Categorizar por tipo de erro
+        var retriableMessages = messages.Where(m => IsRetriableError(m.FailureReason));
+        var permanentErrors = messages.Where(m => !IsRetriableError(m.FailureReason));
+
+        // 3. Reenviar apenas erros temporários
+        foreach (var message in retriableMessages)
+        {
+            await _redrive.RedriveMessageAsync(queueName, message.MessageId);
+            await Task.Delay(100); // Throttling
+        }
+
+        // 4. Registrar erros permanentes para análise
+        foreach (var message in permanentErrors)
+        {
+            _logger.LogWarning("Erro permanente na mensagem {MessageId}: {Reason}",
+                message.MessageId, message.FailureReason);
+        }
+    }
+
+    private bool IsRetriableError(string failureReason)
+    {
+        return failureReason.Contains("HttpRequestException") ||
+               failureReason.Contains("TimeoutException") ||
+               failureReason.Contains("SocketException");
+    }
+}
+```
+
+#### ⏰ **2. Redrive Agendado**
+
+```csharp
+public class ScheduledRedriveService : BackgroundService
+{
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            try
+            {
+                // Verificar DLQs críticas a cada 5 minutos
+                await ProcessarDlqsCriticas();
+
+                // Aguardar próxima execução
+                await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro no redrive agendado");
+                await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
+            }
+        }
+    }
+
+    private async Task ProcessarDlqsCriticas()
+    {
+        var filasMonitoradas = new[] { "pedidos-queue", "pagamentos-queue", "estoque-queue" };
+
+        foreach (var fila in filasMonitoradas)
+        {
+            var messages = await _redrive.GetDeadLetterMessagesAsync(fila, 10);
+
+            if (messages.Any())
+            {
+                _logger.LogWarning("DLQ {QueueName} contém {Count} mensagens",
+                    fila, messages.Count());
+
+                // Reenviar mensagens antigas (mais de 1 hora na DLQ)
+                var oldMessages = messages.Where(m =>
+                    DateTime.UtcNow - m.SentToDlqAt > TimeSpan.FromHours(1));
+
+                foreach (var message in oldMessages)
+                {
+                    await _redrive.RedriveMessageAsync(fila, message.MessageId);
+                }
+            }
+        }
+    }
+}
+```
+
+### 🔍 **Monitoramento de DLQ**
+
+```csharp
+public class DlqMonitoringService
+{
+    public async Task<DlqHealthReport> GenerateHealthReport()
+    {
+        var report = new DlqHealthReport();
+        var queues = new[] { "pedidos-queue", "produtos-queue", "usuarios-queue" };
+
+        foreach (var queue in queues)
+        {
+            try
+            {
+                var messages = await _redrive.GetDeadLetterMessagesAsync(queue, 1000);
+
+                report.QueueReports.Add(new QueueHealthReport
+                {
+                    QueueName = queue,
+                    MessageCount = messages.Count(),
+                    OldestMessage = messages.OrderBy(m => m.SentToDlqAt).FirstOrDefault()?.SentToDlqAt,
+                    MostCommonError = messages.GroupBy(m => m.FailureReason)
+                                           .OrderByDescending(g => g.Count())
+                                           .FirstOrDefault()?.Key,
+                    Status = messages.Count() > 100 ? "Critical" :
+                            messages.Count() > 10 ? "Warning" : "Healthy"
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao gerar relatório da DLQ {QueueName}", queue);
+            }
+        }
+
+        return report;
+    }
+}
+```
+
+## �📋 **Modelos e Interfaces**
 
 ### 🌐 **CloudEvent&lt;T&gt; (Padrão CloudEvents)**
 
@@ -302,6 +717,38 @@ public interface IMessagingConsumer
     int MaxRetry => 5;
     ushort PrefetchCount => 3;
     QueueType QueueType => QueueType.Quorum;
+}
+```
+
+### 🔁 **IMessagingRedrive**
+
+```csharp
+public interface IMessagingRedrive
+{
+    /// <summary>
+    /// Lista mensagens na Dead Letter Queue
+    /// </summary>
+    Task<IEnumerable<DeadLetterMessage>> GetDeadLetterMessagesAsync(string queueName, int maxMessages = 100);
+
+    /// <summary>
+    /// Reenvia uma mensagem específica da DLQ para a fila principal
+    /// </summary>
+    Task<bool> RedriveMessageAsync(string queueName, string messageId);
+
+    /// <summary>
+    /// Reenvia todas as mensagens da DLQ para a fila principal
+    /// </summary>
+    Task<int> RedriveAllMessagesAsync(string queueName, int maxMessages = 0);
+
+    /// <summary>
+    /// Remove uma mensagem específica da DLQ permanentemente
+    /// </summary>
+    Task<bool> PurgeDeadLetterMessageAsync(string queueName, string messageId);
+
+    /// <summary>
+    /// Limpa completamente uma DLQ (remove todas as mensagens)
+    /// </summary>
+    Task<int> PurgeDeadLetterQueueAsync(string queueName);
 }
 ```
 
@@ -490,12 +937,15 @@ Devplus.Messaging/
 │   │   └── QueueType.cs                # Tipos de fila (Quorum/Classic)
 │   ├── Interfaces/
 │   │   ├── IMessagingConsumer.cs       # Interface para consumidores
-│   │   └── IMessagingPublisher.cs      # Interface para publicação
+│   │   ├── IMessagingPublisher.cs      # Interface para publicação
+│   │   └── IMessagingRedrive.cs        # Interface para operações de redrive
 │   ├── Models/
-│   │   └── CloudEvent.cs               # Modelo CloudEvents
+│   │   ├── CloudEvent.cs               # Modelo CloudEvents
+│   │   └── DeadLetterMessage.cs        # Modelo para mensagens DLQ
 │   ├── Services/
 │   │   ├── RabbitMqHostedService.cs    # Background service para consumidores
-│   │   └── RabbitMqPublisher.cs        # Implementação do publisher
+│   │   ├── RabbitMqPublisher.cs        # Implementação do publisher
+│   │   └── RabbitMqRedriveService.cs   # Implementação do redrive
 │   └── MessagingServiceCollectionExtensions.cs # DI configuration
 ```
 
@@ -507,6 +957,7 @@ Devplus.Messaging/
 | **Queue Declaration**    | Criação automática de filas (principais e DLQ)     |
 | **Binding Automation**   | Vinculação automática entre exchanges e filas      |
 | **DLX Setup**            | Configuração automática de Dead Letter Exchange    |
+| **Redrive System**       | Operações completas de redrive para mensagens DLQ  |
 | **Reconnection**         | Reconexão automática em caso de falhas             |
 | **QoS Management**       | Gerenciamento de Quality of Service por consumidor |
 
@@ -660,6 +1111,9 @@ docker-compose -f docker/docker-compose.yaml down
 5. **🔍 Logs Detalhados**: Implemente logging estruturado nos consumidores
 6. **⚠️ Tratamento de Erros**: Diferencie erros temporários de permanentes
 7. **🎯 Routing Keys**: Use routing keys para roteamento específico
+8. **🔁 Monitoramento DLQ**: Configure alertas para DLQs com muitas mensagens
+9. **📊 Redrive Inteligente**: Use análise de erros antes de fazer redrive em massa
+10. **⏰ Redrive Agendado**: Implemente redrive automático para erros temporários
 
 ### ❌ **Evite**
 
@@ -668,6 +1122,9 @@ docker-compose -f docker/docker-compose.yaml down
 - ❌ Fazer throw para erros de dados inválidos
 - ❌ Usar `PrefetchCount` muito alto sem CPU/memória adequada
 - ❌ Ignorar mensagens na DLQ sem monitoramento
+- ❌ Fazer redrive em massa sem analisar os erros primeiro
+- ❌ Remover mensagens da DLQ sem investigação adequada
+- ❌ Redrive frequente de mensagens com erros permanentes
 
 ### 🔧 **Exemplo de Configuração de Produção**
 
@@ -712,4 +1169,4 @@ Contribuições são bem-vindas! Para contribuir:
 
 ---
 
-**Devplus.Messaging v2.7.4** - Mensageria robusta e escalável para aplicações .NET 🚀
+**Devplus.Messaging v3.0.0** - Mensageria robusta e escalável com sistema de redrive completo para aplicações .NET 🚀
