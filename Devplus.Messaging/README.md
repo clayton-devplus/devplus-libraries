@@ -1169,4 +1169,4 @@ Contribuições são bem-vindas! Para contribuir:
 
 ---
 
-**Devplus.Messaging v3.0.0** - Mensageria robusta e escalável com sistema de redrive completo para aplicações .NET 🚀
+**Devplus.Messaging v3.0.1** - Mensageria robusta e escalável com sistema de redrive completo para aplicações .NET 🚀
