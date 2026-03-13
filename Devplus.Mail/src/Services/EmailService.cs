@@ -20,7 +20,8 @@ public class EmailService : IEmailService
         _sendGridConfig = _configuration.GetSection("SendGrid").Get<SendGridConfig>() ?? throw new ArgumentNullException(nameof(_sendGridConfig), "SendGrid configuration section is missing.");
     }
     public async Task<bool> SendEmailAsync(string toEmail, string subject, string plainTextContent, string htmlContent,
-                                            IEnumerable<EmailAttachment>? attachments = null)
+                                            IEnumerable<EmailAttachment>? attachments = null,
+                                            string fromName = "")
     {
         if (string.IsNullOrEmpty(toEmail))
             throw new ArgumentException("Recipient email address is required.", nameof(toEmail));
@@ -30,7 +31,7 @@ public class EmailService : IEmailService
             throw new ArgumentException("At least one content type (plain text or HTML) is required.");
 
         var client = new SendGridClient(_sendGridConfig.ApiKey);
-        var from = new EmailAddress(_sendGridConfig.FromEmail, _sendGridConfig.FromName);
+        var from = new EmailAddress(_sendGridConfig.FromEmail, string.IsNullOrEmpty(fromName) ? _sendGridConfig.FromName : fromName);
         var to = new EmailAddress(toEmail);
         var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
 
@@ -58,7 +59,8 @@ public class EmailService : IEmailService
     }
     public async Task<bool> SendTemplateEmail(string toEmail, string subject, string message, string link = "",
                                                 EmailTemplateType templateType = EmailTemplateType.Success,
-                                                IEnumerable<EmailAttachment>? attachments = null)
+                                                IEnumerable<EmailAttachment>? attachments = null,
+                                                string fromName = "")
     {
         if (string.IsNullOrEmpty(toEmail))
             throw new ArgumentException("Recipient email address is required.", nameof(toEmail));
@@ -97,7 +99,7 @@ public class EmailService : IEmailService
         }
 
         var client = new SendGridClient(_sendGridConfig.ApiKey);
-        var from = new EmailAddress(_sendGridConfig.FromEmail, _sendGridConfig.FromName);
+        var from = new EmailAddress(_sendGridConfig.FromEmail, string.IsNullOrEmpty(fromName) ? _sendGridConfig.FromName : fromName);
         var to = new EmailAddress(toEmail);
         var msg = MailHelper.CreateSingleEmail(from, to, subject, "", template);
 

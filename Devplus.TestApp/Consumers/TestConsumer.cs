@@ -16,7 +16,7 @@ public class TestConsumer : IMessagingConsumer
     {
         _logger.LogInformation("Received message: {Message}", cloudEvent.Data);
 
-        throw new Exception("Erro ao processar a mensagem");
+        //throw new Exception("Erro ao processar a mensagem");
 
         return Task.CompletedTask;
     }
