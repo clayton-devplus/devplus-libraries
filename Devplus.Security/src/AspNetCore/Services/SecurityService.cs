@@ -24,7 +24,9 @@ public sealed class SecurityService : ISecurityService
     }
 
     public Dictionary<string, string> GetUserClaims()
-        => _accessor.HttpContext?.User.Claims?.ToDictionary(c => c.Type, c => c.Value)
+        => _accessor.HttpContext?.User.Claims?
+               .GroupBy(c => c.Type)
+               .ToDictionary(g => g.Key, g => string.Join(",", g.Select(c => c.Value)))
            ?? new Dictionary<string, string>();
 
     public IEnumerable<string> GetUserRoles()
