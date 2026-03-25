@@ -92,4 +92,30 @@ public sealed class SecurityService : ISecurityService
         return _oauth.RemoveClientAppUser(request);
     }
 
+    public Task<List<UsuarioResponseDto>> GetUsersClientApp()
+        => _oauth.GetUsersClientApp();
+
+    public Task<List<SystemClaimResponseDto>> GetClientAppClaims()
+        => _oauth.GetClientAppClaims();
+
+    public Task<List<UsuarioClaimResponseDto>> GetUserAppClaims(long userId)
+        => _oauth.GetUserAppClaims(userId);
+
+    public Task<bool> InsertUserAppClaims(long userId, Guid systemClaimId)
+        => _oauth.InsertUserAppClaims(userId, systemClaimId);
+
+    public Task<bool> RemoveUserAppClaims(long userId, Guid systemClaimId)
+        => _oauth.RemoveUserAppClaims(userId, systemClaimId);
+
+    public Task<List<RoleResponseDto>> GetClientAppRoles()
+        => _oauth.GetClientAppRoles();
+
+    public Task<List<UsuarioRoleResponseDto>> GetUserAppRoles(long userId)
+        => _oauth.GetUserAppRoles(userId);
+
+    public Task<bool> InsertUserAppRoles(long userId, Guid roleId)
+        => _oauth.InsertUserAppRoles(userId, roleId);
+
+    public Task<bool> RemoveUserAppRoles(long userId, Guid roleId)
+        => _oauth.RemoveUserAppRoles(userId, roleId);
 }

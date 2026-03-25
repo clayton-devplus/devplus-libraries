@@ -35,7 +35,14 @@ public class TestMessageController : ControllerBase
     public async Task<IActionResult> SendMessage()
     {
 
-        await _testMessageService.SendMessage();
+        //await _testMessageService.SendMessage();
+        var users = await _securityService.GetUsersClientApp();
+        var roles = await _securityService.GetClientAppRoles();
+        var claims = await _securityService.GetClientAppClaims();
+        var userClaims = await _securityService.GetUserAppClaims(1);
+        var userRoles = await _securityService.GetUserAppRoles(1);
+        var r = await _securityService.RemoveUserAppRoles(1, Guid.Parse("1a8c10ea-0698-4c55-a2b7-7f8408b0e0e7"));
+
         return Ok("Mensagem enviada com sucesso");
 
         // var resp = (new Devplus.Security.OAuth.Contracts.CreateClientAppRequestDto

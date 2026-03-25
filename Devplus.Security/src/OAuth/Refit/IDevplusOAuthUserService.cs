@@ -15,6 +15,31 @@ public interface IDevplusOAuthUserService
     Task Logout([Body] RefreshTokenOAuthRequestDto refreshTokenRequest);
 
     [Post("/v1/integration/get-client-app-users")]
-    Task<UsuarioResponseDto> GetUsersClientApp();
+    Task<List<UsuarioResponseDto>> GetUsersClientApp();
 
+    // Claims
+    [Get("/v1/integration/client-app-claims")]
+    Task<List<SystemClaimResponseDto>> GetClientAppClaims();
+
+    [Get("/v1/integration/user-app-claims/{userId}")]
+    Task<List<UsuarioClaimResponseDto>> GetUserAppClaims(long userId);
+
+    [Post("/v1/integration/user-app-claims/{userId}/{systemClaimId}")]
+    Task<bool> InsertUserAppClaims(long userId, Guid systemClaimId);
+
+    [Delete("/v1/integration/user-app-claims/{userId}/{systemClaimId}")]
+    Task<bool> RemoveUserAppClaims(long userId, Guid systemClaimId);
+
+    // Roles
+    [Get("/v1/integration/client-app-roles")]
+    Task<List<RoleResponseDto>> GetClientAppRoles();
+
+    [Get("/v1/integration/user-app-roles/{userId}")]
+    Task<List<UsuarioRoleResponseDto>> GetUserAppRoles(long userId);
+
+    [Post("/v1/integration/user-app-roles/{userId}/{roleId}")]
+    Task<bool> InsertUserAppRoles(long userId, Guid roleId);
+
+    [Delete("/v1/integration/user-app-roles/{userId}/{roleId}")]
+    Task<bool> RemoveUserAppRoles(long userId, Guid roleId);
 }

@@ -45,6 +45,51 @@ public class DevplusOAuthService : IOAuthService
         return _devplusOAuthUserService.RemoveUser(request);
     }
 
+    public Task<List<UsuarioResponseDto>> GetUsersClientApp()
+    {
+        return _devplusOAuthUserService.GetUsersClientApp();
+    }
+
+    public Task<List<SystemClaimResponseDto>> GetClientAppClaims()
+    {
+        return _devplusOAuthUserService.GetClientAppClaims();
+    }
+
+    public Task<List<UsuarioClaimResponseDto>> GetUserAppClaims(long userId)
+    {
+        return _devplusOAuthUserService.GetUserAppClaims(userId);
+    }
+
+    public Task<bool> InsertUserAppClaims(long userId, Guid systemClaimId)
+    {
+        return _devplusOAuthUserService.InsertUserAppClaims(userId, systemClaimId);
+    }
+
+    public Task<bool> RemoveUserAppClaims(long userId, Guid systemClaimId)
+    {
+        return _devplusOAuthUserService.RemoveUserAppClaims(userId, systemClaimId);
+    }
+
+    public Task<List<RoleResponseDto>> GetClientAppRoles()
+    {
+        return _devplusOAuthUserService.GetClientAppRoles();
+    }
+
+    public Task<List<UsuarioRoleResponseDto>> GetUserAppRoles(long userId)
+    {
+        return _devplusOAuthUserService.GetUserAppRoles(userId);
+    }
+
+    public Task<bool> InsertUserAppRoles(long userId, Guid roleId)
+    {
+        return _devplusOAuthUserService.InsertUserAppRoles(userId, roleId);
+    }
+
+    public Task<bool> RemoveUserAppRoles(long userId, Guid roleId)
+    {
+        return _devplusOAuthUserService.RemoveUserAppRoles(userId, roleId);
+    }
+
     public async Task<Token> RequestPasswordRecovery(PasswordRecoveryRequestDto passwordRecoveryRequestDto)
     {
         return await _devplusOAuthService.RequestPasswordRecovery(passwordRecoveryRequestDto);
