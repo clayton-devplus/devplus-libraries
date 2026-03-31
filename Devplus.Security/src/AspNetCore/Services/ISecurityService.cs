@@ -12,7 +12,7 @@ public interface ISecurityService
     Task<Token> AuthorizeUser(UserLoginDto userInfo);
     Task<Token> ExchangeCode(string code, string state);
     Task<Token> RefreshToken(string refreshToken);
-    Task<Token> RequestPasswordRecovery(string emailOrLogin);
+    Task<Token> RequestPasswordRecovery(string emailOrLogin, Guid? customEmailTemplateId = null);
     Task<Token> ResetPassword(string resetToken, string newPassword);
     Task Logout(string refreshToken);
 

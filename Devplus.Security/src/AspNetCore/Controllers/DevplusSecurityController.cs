@@ -30,7 +30,7 @@ public class DevplusSecurityController : ControllerBase
     [HttpPost("password-recovery-request")]
     public async Task<IActionResult> RequestPasswordRecovery([FromBody] PasswordRecoveryDto dto)
     {
-        await _security.RequestPasswordRecovery(dto.Email);
+        await _security.RequestPasswordRecovery(dto.Email, dto.CustomEmailTemplateId);
         return Created();
     }
 

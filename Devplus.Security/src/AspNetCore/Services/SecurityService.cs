@@ -67,11 +67,12 @@ public sealed class SecurityService : ISecurityService
     public Task<Token> RefreshToken(string refresh)
         => _oauth.RefreshToken(new RefreshTokenOAuthRequestDto { RefreshToken = refresh });
 
-    public Task<Token> RequestPasswordRecovery(string emailOrLogin)
+    public Task<Token> RequestPasswordRecovery(string emailOrLogin, Guid? customEmailTemplateId = null)
         => _oauth.RequestPasswordRecovery(new PasswordRecoveryRequestDto
         {
             EmailOrLogin = emailOrLogin,
-            ResetLink = _opt.Value.PasswordRecoveryRedirectUrl ?? string.Empty
+            ResetLink = _opt.Value.PasswordRecoveryRedirectUrl ?? string.Empty,
+            CustomEmailTemplateId = customEmailTemplateId
         });
 
     public Task<Token> ResetPassword(string token, string newPwd)
