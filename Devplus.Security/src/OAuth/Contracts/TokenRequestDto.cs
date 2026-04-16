@@ -12,4 +12,5 @@ public class TokenRequestDto
     public string? Code { get; set; }
     public string? RedirectUri { get; set; }
     public string? CodeVerifier { get; set; }
+    public Guid? SystemId { get; set; }
 }

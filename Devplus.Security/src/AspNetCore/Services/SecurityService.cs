@@ -54,6 +54,7 @@ public sealed class SecurityService : ISecurityService
         {
             ClientId = Guid.Parse(s.ClientId ?? ""),
             ClientSecret = s.ClientSecret ?? "",
+            SystemId = s.SystemId,
             Password = user.Senha ?? string.Empty,
             Username = user.NomeUsuario ?? string.Empty,
             GrantType = "password"
@@ -62,7 +63,7 @@ public sealed class SecurityService : ISecurityService
     }
 
     public Task<Token> ExchangeCode(string code, string state)
-        => _oauth.GetTokenAsync(new TokenRequestDto { Code = code, GrantType = "authorization_code" });
+        => _oauth.GetTokenAsync(new TokenRequestDto { Code = code, GrantType = "authorization_code", SystemId = _opt.Value.SystemId });
 
     public Task<Token> RefreshToken(string refresh)
         => _oauth.RefreshToken(new RefreshTokenOAuthRequestDto { RefreshToken = refresh });
