@@ -52,8 +52,8 @@ public sealed class SecurityService : ISecurityService
         var s = _opt.Value;
         var req = new TokenRequestDto
         {
-            ClientId = Guid.Parse(s.ClientId ?? ""),
-            ClientSecret = s.ClientSecret ?? "",
+            ClientId = Guid.TryParse(s.ClientId, out var cid) ? cid : null,
+            ClientSecret = s.ClientSecret,
             SystemId = s.SystemId,
             Password = user.Senha ?? string.Empty,
             Username = user.NomeUsuario ?? string.Empty,
