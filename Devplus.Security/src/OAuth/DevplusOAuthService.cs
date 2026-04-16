@@ -94,4 +94,9 @@ public class DevplusOAuthService : IOAuthService
     {
         return await _devplusOAuthService.RequestPasswordRecovery(passwordRecoveryRequestDto);
     }
+
+    public Task<SelfRegistrationResponseDto> SelfRegistration(SelfRegistrationRequestDto request)
+    {
+        return _devplusOAuthUserService.SelfRegistration(request);
+    }
 }

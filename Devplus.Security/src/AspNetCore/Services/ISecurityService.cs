@@ -32,5 +32,8 @@ public interface ISecurityService
     Task<bool> InsertUserAppRoles(long userId, Guid roleId);
     Task<bool> RemoveUserAppRoles(long userId, Guid roleId);
 
+    // Self Registration
+    Task<SelfRegistrationResponseDto> SelfRegistration(SelfRegistrationRequestDto request);
+
     void AddClaim(string type, string value);
 }

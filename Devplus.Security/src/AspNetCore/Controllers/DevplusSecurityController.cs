@@ -76,4 +76,12 @@ public class DevplusSecurityController : ControllerBase
         await _security.RemoveClientAppUser(dto);
         return NoContent();
     }
+
+    [AllowAnonymous]
+    [HttpPost("self-registration")]
+    public async Task<IActionResult> SelfRegistration([FromBody] SelfRegistrationRequestDto dto)
+    {
+        var result = await _security.SelfRegistration(dto);
+        return Ok(result);
+    }
 }

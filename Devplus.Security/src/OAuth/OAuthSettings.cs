@@ -14,4 +14,10 @@ public sealed class OAuthSettings
 
     // password recovery
     public string? PasswordRecoveryRedirectUrl { get; init; }
+
+    // self registration
+    public Guid? SystemId { get; init; }
+
+    // modo SaaS
+    public bool SaasMode { get; init; } = false;
 }

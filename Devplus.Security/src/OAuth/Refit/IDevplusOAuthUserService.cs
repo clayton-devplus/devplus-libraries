@@ -42,4 +42,8 @@ public interface IDevplusOAuthUserService
 
     [Delete("/v1/integration/user-app-roles/{userId}/{roleId}")]
     Task<bool> RemoveUserAppRoles(long userId, Guid roleId);
+
+    // Self Registration
+    [Post("/v1/integration/self-registration")]
+    Task<SelfRegistrationResponseDto> SelfRegistration([Body] SelfRegistrationRequestDto request);
 }

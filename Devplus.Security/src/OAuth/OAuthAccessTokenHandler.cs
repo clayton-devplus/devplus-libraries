@@ -24,16 +24,21 @@ public class OAuthAccessTokenHandler : DelegatingHandler
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
     {
         var s = _opt.Value;
-        var tokenReq = new TokenRequestDto
-        {
-            GrantType = "client_credentials",
-            ClientId = Guid.Parse(s.ClientId ?? throw new InvalidOperationException("OAuthSettings:ClientId ausente")),
-            ClientSecret = s.ClientSecret ?? throw new InvalidOperationException("OAuthSettings:ClientSecret ausente")
-        };
 
-        var tokenRes = await _refit.GetTokenAsync(tokenReq);
-        request.Headers.Authorization =
-            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenRes.AccessToken);
+        if (!s.SaasMode)
+        {
+            var tokenReq = new TokenRequestDto
+            {
+                GrantType = "client_credentials",
+                ClientId = Guid.Parse(s.ClientId ?? throw new InvalidOperationException("OAuthSettings:ClientId ausente")),
+                ClientSecret = s.ClientSecret ?? throw new InvalidOperationException("OAuthSettings:ClientSecret ausente")
+            };
+
+            var tokenRes = await _refit.GetTokenAsync(tokenReq);
+            request.Headers.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenRes.AccessToken);
+
+        }
 
         return await base.SendAsync(request, ct);
     }

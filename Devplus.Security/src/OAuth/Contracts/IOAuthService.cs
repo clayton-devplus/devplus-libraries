@@ -23,4 +23,7 @@ public interface IOAuthService
     Task<List<UsuarioRoleResponseDto>> GetUserAppRoles(long userId);
     Task<bool> InsertUserAppRoles(long userId, Guid roleId);
     Task<bool> RemoveUserAppRoles(long userId, Guid roleId);
+
+    // Self Registration
+    Task<SelfRegistrationResponseDto> SelfRegistration(SelfRegistrationRequestDto request);
 }

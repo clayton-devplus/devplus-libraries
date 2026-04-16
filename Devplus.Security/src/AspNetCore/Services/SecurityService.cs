@@ -119,4 +119,12 @@ public sealed class SecurityService : ISecurityService
 
     public Task<bool> RemoveUserAppRoles(long userId, Guid roleId)
         => _oauth.RemoveUserAppRoles(userId, roleId);
+
+    public Task<SelfRegistrationResponseDto> SelfRegistration(SelfRegistrationRequestDto request)
+    {
+        if (_opt.Value.SystemId.HasValue)
+            request.SystemId = _opt.Value.SystemId.Value;
+
+        return _oauth.SelfRegistration(request);
+    }
 }
