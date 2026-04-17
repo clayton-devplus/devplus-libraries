@@ -1,5 +1,7 @@
 using Devplus.Security.OAuth.Contracts;
+using Devplus.Security.OAuth.Exceptions;
 using Devplus.Security.OAuth.Refit;
+using Refit;
 
 namespace Devplus.Security.OAuth;
 
@@ -15,88 +17,105 @@ public class DevplusOAuthService : IOAuthService
         _devplusOAuthUserService = devplusOAuthUserService;
     }
 
-    public Task<CreateClientAppResponseDto> CreateClientAppUser(CreateClientAppRequestDto request)
+    public async Task<CreateClientAppResponseDto> CreateClientAppUser(CreateClientAppRequestDto request)
     {
-        return _devplusOAuthUserService.CreateUser(request);
+        try { return await _devplusOAuthUserService.CreateUser(request); }
+        catch (ApiException ex) { throw OAuthApiException.FromApiException(ex); }
     }
 
     public async Task<Token> GetTokenAsync(TokenRequestDto tokenRequest)
     {
-        return await _devplusOAuthService.GetTokenAsync(tokenRequest);
+        try { return await _devplusOAuthService.GetTokenAsync(tokenRequest); }
+        catch (ApiException ex) { throw OAuthApiException.FromApiException(ex); }
     }
 
     public async Task Logout(RefreshTokenOAuthRequestDto refreshTokenRequest)
     {
-        await _devplusOAuthUserService.Logout(refreshTokenRequest);
+        try { await _devplusOAuthUserService.Logout(refreshTokenRequest); }
+        catch (ApiException ex) { throw OAuthApiException.FromApiException(ex); }
     }
 
     public async Task<Token> PasswordReset(PasswordResetRequestDto passwordResetDto)
     {
-        return await _devplusOAuthService.PasswordReset(passwordResetDto);
+        try { return await _devplusOAuthService.PasswordReset(passwordResetDto); }
+        catch (ApiException ex) { throw OAuthApiException.FromApiException(ex); }
     }
 
     public async Task<Token> RefreshToken(RefreshTokenOAuthRequestDto refreshTokenRequest)
     {
-        return await _devplusOAuthService.RefreshToken(refreshTokenRequest);
+        try { return await _devplusOAuthService.RefreshToken(refreshTokenRequest); }
+        catch (ApiException ex) { throw OAuthApiException.FromApiException(ex); }
     }
 
-    public Task RemoveClientAppUser(RemoveClientAppRequestDto request)
+    public async Task RemoveClientAppUser(RemoveClientAppRequestDto request)
     {
-        return _devplusOAuthUserService.RemoveUser(request);
+        try { await _devplusOAuthUserService.RemoveUser(request); }
+        catch (ApiException ex) { throw OAuthApiException.FromApiException(ex); }
     }
 
-    public Task<List<UsuarioResponseDto>> GetUsersClientApp()
+    public async Task<List<UsuarioResponseDto>> GetUsersClientApp()
     {
-        return _devplusOAuthUserService.GetUsersClientApp();
+        try { return await _devplusOAuthUserService.GetUsersClientApp(); }
+        catch (ApiException ex) { throw OAuthApiException.FromApiException(ex); }
     }
 
-    public Task<List<SystemClaimResponseDto>> GetClientAppClaims()
+    public async Task<List<SystemClaimResponseDto>> GetClientAppClaims()
     {
-        return _devplusOAuthUserService.GetClientAppClaims();
+        try { return await _devplusOAuthUserService.GetClientAppClaims(); }
+        catch (ApiException ex) { throw OAuthApiException.FromApiException(ex); }
     }
 
-    public Task<List<UsuarioClaimResponseDto>> GetUserAppClaims(long userId)
+    public async Task<List<UsuarioClaimResponseDto>> GetUserAppClaims(long userId)
     {
-        return _devplusOAuthUserService.GetUserAppClaims(userId);
+        try { return await _devplusOAuthUserService.GetUserAppClaims(userId); }
+        catch (ApiException ex) { throw OAuthApiException.FromApiException(ex); }
     }
 
-    public Task<bool> InsertUserAppClaims(long userId, Guid systemClaimId)
+    public async Task<bool> InsertUserAppClaims(long userId, Guid systemClaimId)
     {
-        return _devplusOAuthUserService.InsertUserAppClaims(userId, systemClaimId);
+        try { return await _devplusOAuthUserService.InsertUserAppClaims(userId, systemClaimId); }
+        catch (ApiException ex) { throw OAuthApiException.FromApiException(ex); }
     }
 
-    public Task<bool> RemoveUserAppClaims(long userId, Guid systemClaimId)
+    public async Task<bool> RemoveUserAppClaims(long userId, Guid systemClaimId)
     {
-        return _devplusOAuthUserService.RemoveUserAppClaims(userId, systemClaimId);
+        try { return await _devplusOAuthUserService.RemoveUserAppClaims(userId, systemClaimId); }
+        catch (ApiException ex) { throw OAuthApiException.FromApiException(ex); }
     }
 
-    public Task<List<RoleResponseDto>> GetClientAppRoles()
+    public async Task<List<RoleResponseDto>> GetClientAppRoles()
     {
-        return _devplusOAuthUserService.GetClientAppRoles();
+        try { return await _devplusOAuthUserService.GetClientAppRoles(); }
+        catch (ApiException ex) { throw OAuthApiException.FromApiException(ex); }
     }
 
-    public Task<List<UsuarioRoleResponseDto>> GetUserAppRoles(long userId)
+    public async Task<List<UsuarioRoleResponseDto>> GetUserAppRoles(long userId)
     {
-        return _devplusOAuthUserService.GetUserAppRoles(userId);
+        try { return await _devplusOAuthUserService.GetUserAppRoles(userId); }
+        catch (ApiException ex) { throw OAuthApiException.FromApiException(ex); }
     }
 
-    public Task<bool> InsertUserAppRoles(long userId, Guid roleId)
+    public async Task<bool> InsertUserAppRoles(long userId, Guid roleId)
     {
-        return _devplusOAuthUserService.InsertUserAppRoles(userId, roleId);
+        try { return await _devplusOAuthUserService.InsertUserAppRoles(userId, roleId); }
+        catch (ApiException ex) { throw OAuthApiException.FromApiException(ex); }
     }
 
-    public Task<bool> RemoveUserAppRoles(long userId, Guid roleId)
+    public async Task<bool> RemoveUserAppRoles(long userId, Guid roleId)
     {
-        return _devplusOAuthUserService.RemoveUserAppRoles(userId, roleId);
+        try { return await _devplusOAuthUserService.RemoveUserAppRoles(userId, roleId); }
+        catch (ApiException ex) { throw OAuthApiException.FromApiException(ex); }
     }
 
     public async Task<Token> RequestPasswordRecovery(PasswordRecoveryRequestDto passwordRecoveryRequestDto)
     {
-        return await _devplusOAuthService.RequestPasswordRecovery(passwordRecoveryRequestDto);
+        try { return await _devplusOAuthService.RequestPasswordRecovery(passwordRecoveryRequestDto); }
+        catch (ApiException ex) { throw OAuthApiException.FromApiException(ex); }
     }
 
-    public Task<SelfRegistrationResponseDto> SelfRegistration(SelfRegistrationRequestDto request)
+    public async Task<SelfRegistrationResponseDto> SelfRegistration(SelfRegistrationRequestDto request)
     {
-        return _devplusOAuthUserService.SelfRegistration(request);
+        try { return await _devplusOAuthUserService.SelfRegistration(request); }
+        catch (ApiException ex) { throw OAuthApiException.FromApiException(ex); }
     }
 }
