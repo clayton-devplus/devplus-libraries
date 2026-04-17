@@ -1,3 +1,4 @@
+using Devplus.Security.AspNetCore.Filters;
 using Devplus.Security.AspNetCore.Services;
 using Devplus.Security.OAuth.Contracts;
 using Microsoft.AspNetCore.Authorization;
@@ -9,6 +10,7 @@ namespace Devplus.Security.AspNetCore.Controllers;
 [ApiVersion("1.0")]
 [Produces("application/json")]
 [Route("api/v1/security")] // ou algo configurável por Options se quiser
+[TypeFilter(typeof(OAuthExceptionFilter))]
 public class DevplusSecurityController : ControllerBase
 {
     private readonly ISecurityService _security;
