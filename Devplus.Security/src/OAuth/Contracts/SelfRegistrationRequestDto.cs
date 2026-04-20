@@ -6,6 +6,8 @@ public class SelfRegistrationRequestDto
     public string Email { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
     public Guid SystemId { get; set; }
+    public Guid? CustomTemplateId { get; set; }
+    public string? AppUrl { get; set; }
 
     // Dados do Tenant
     public string? TenantName { get; set; }
