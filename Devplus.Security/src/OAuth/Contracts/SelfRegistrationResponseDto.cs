@@ -7,4 +7,5 @@ public class SelfRegistrationResponseDto
     public string Name { get; set; } = string.Empty;
     public Guid TenantId { get; set; }
     public Guid ClientAppId { get; set; }
+    public Guid? CustomTemplateId { get; set; }
 }
