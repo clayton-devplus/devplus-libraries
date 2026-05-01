@@ -37,7 +37,13 @@ public class OAuthAccessTokenHandler : DelegatingHandler
             var tokenRes = await _refit.GetTokenAsync(tokenReq);
             request.Headers.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenRes.AccessToken);
-
+        }
+        else
+        {
+            // SaaS mode: forward do Bearer JWT do usuário logado
+            var authHeader = _http.HttpContext?.Request.Headers["Authorization"].FirstOrDefault();
+            if (!string.IsNullOrEmpty(authHeader))
+                request.Headers.TryAddWithoutValidation("Authorization", authHeader);
         }
 
         return await base.SendAsync(request, ct);
