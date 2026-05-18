@@ -3,6 +3,7 @@ using Devplus.Messaging.Interfaces;
 using Devplus.Messaging.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 
 namespace Devplus.Messaging;
@@ -32,6 +33,12 @@ public static class MessagingServiceCollectionExtensions
 
         if (RegisterConsumers)
             services.AddHostedService<RabbitMqHostedService>();
+
+        // Aplica filtro de log para suprimir logs da lib de mensageria conforme configuração
+        services.AddLogging(builder =>
+        {
+            builder.AddFilter("Devplus.Messaging", rabbitMqConfig.MinimumLogLevel);
+        });
 
         return services;
     }

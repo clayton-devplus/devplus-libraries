@@ -18,6 +18,7 @@
 - 🔗 **Binding automático** de exchanges e filas
 - 🛡️ **Tratamento robusto de erros** e reconexão automática
 - 📝 **Logging detalhado** para monitoramento e debug
+- 🔇 **Controle de log configurável** para evitar excesso de logs em produção
 
 ---
 
@@ -775,7 +776,32 @@ public enum QueueType
     "Password": "senha123", // Senha de autenticação
     "VHost": "/", // Virtual Host (padrão: "/")
     "GlobalPrefetchCount": 10, // QoS global (padrão: 3)
-    "UseGlobalPrefetch": true // Usar QoS global (padrão: true)
+    "UseGlobalPrefetch": true, // Usar QoS global (padrão: true)
+    "MinimumLogLevel": "Information" // Nível mínimo de log (padrão: Information)
+  }
+}
+```
+
+#### 🔇 **Controle de Log (MinimumLogLevel)**
+
+A propriedade `MinimumLogLevel` permite controlar o volume de logs gerados pela biblioteca. Isso é especialmente útil em **ambientes de produção** onde logs excessivos podem lotar o disco (ex: Event Viewer no Windows).
+
+| Valor           | Efeito                                                                    |
+| --------------- | ------------------------------------------------------------------------- |
+| `"Trace"`       | Todos os logs (máximo detalhe)                                            |
+| `"Debug"`       | Logs de debug + informação + avisos + erros                               |
+| `"Information"` | **Padrão** — comportamento atual (logs de mensagens recebidas/publicadas) |
+| `"Warning"`     | Apenas avisos e erros (recomendado para produção)                         |
+| `"Error"`       | Apenas erros críticos                                                     |
+| `"None"`        | Desabilita completamente os logs da biblioteca                            |
+
+**Exemplo para produção (suprime logs informativos):**
+
+```json
+{
+  "RabbitMq": {
+    "Host": "rabbitmq.prod.empresa.com",
+    "MinimumLogLevel": "Warning"
   }
 }
 ```
@@ -1137,10 +1163,13 @@ docker-compose -f docker/docker-compose.yaml down
     "Password": "${RABBITMQ_PASSWORD}",
     "VHost": "/producao",
     "GlobalPrefetchCount": 20,
-    "UseGlobalPrefetch": false
+    "UseGlobalPrefetch": false,
+    "MinimumLogLevel": "Warning"
   }
 }
 ```
+
+> ⚠️ **Importante**: Em produção, recomendamos configurar `MinimumLogLevel` como `"Warning"` ou `"Error"` para evitar que logs de mensagens recebidas/publicadas encham o disco do servidor.
 
 ## 📄 **Licença**
 
