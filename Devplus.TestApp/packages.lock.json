@@ -31,38 +31,6 @@
           "Microsoft.IdentityModel.Protocols.OpenIdConnect": "7.1.2"
         }
       },
-      "Microsoft.AspNetCore.Authorization": {
-        "type": "Transitive",
-        "resolved": "8.0.8",
-        "contentHash": "e+ehkJTx0bqUb9zzM9ohV830LhoK3fy5lfVGPWAozbq6I2rJpyq7L0OUgEGNEQLMTzawkDjpNlJ4WU1ck/TDjw==",
-        "dependencies": {
-          "Microsoft.AspNetCore.Metadata": "8.0.8",
-          "Microsoft.Extensions.Logging.Abstractions": "8.0.1",
-          "Microsoft.Extensions.Options": "8.0.2"
-        }
-      },
-      "Microsoft.AspNetCore.Http.Abstractions": {
-        "type": "Transitive",
-        "resolved": "2.2.0",
-        "contentHash": "Nxs7Z1q3f1STfLYKJSVXCs1iBl+Ya6E8o4Oy1bCxJ/rNI44E/0f6tbsrVqAWfB7jlnJfyaAtIalBVxPKUPQb4Q==",
-        "dependencies": {
-          "Microsoft.AspNetCore.Http.Features": "2.2.0",
-          "System.Text.Encodings.Web": "4.5.0"
-        }
-      },
-      "Microsoft.AspNetCore.Http.Features": {
-        "type": "Transitive",
-        "resolved": "2.2.0",
-        "contentHash": "ziFz5zH8f33En4dX81LW84I6XrYXKf9jg6aM39cM+LffN9KJahViKZ61dGMSO2gd3e+qe5yBRwsesvyqlZaSMg==",
-        "dependencies": {
-          "Microsoft.Extensions.Primitives": "2.2.0"
-        }
-      },
-      "Microsoft.AspNetCore.Metadata": {
-        "type": "Transitive",
-        "resolved": "8.0.8",
-        "contentHash": "4WSCv7ddawjabLZ7hj0Ai7hTzFYLw5PsvHVKrJkuBgrv+blELbIDMVj7b5q7PZs7Xvz0W0ViKY/rcVkqD0D5yQ=="
-      },
       "Microsoft.AspNetCore.Mvc.Versioning": {
         "type": "Transitive",
         "resolved": "5.1.0",
@@ -475,19 +443,16 @@
       },
       "Refit": {
         "type": "Transitive",
-        "resolved": "7.1.2",
-        "contentHash": "ZB1ZgciDq/lNz3OAPfYah4rCVYeI4LMxEksYUff8p4Bth9uf/8WQCXuzMckRJjh3NLysuwdCNkgxnezCm1SqTw==",
-        "dependencies": {
-          "System.Net.Http.Json": "8.0.0"
-        }
+        "resolved": "7.2.22",
+        "contentHash": "xzpjDvWTKaJkhRejrHI6E2WXs2CaJYWZTMICq5Jha4wlSVvR3dd9n3M4p3X7BQ6uw0LJSFiHlTYwzjQIbJdArg=="
       },
       "Refit.HttpClientFactory": {
         "type": "Transitive",
-        "resolved": "7.1.2",
-        "contentHash": "i5NtxonKcDQ3ob0fhFAZNj18GuBfefDYNZgEMiRhzt5nhWCy3Rn4koTTst8NOViTr/GaP3O0fZxomkZNShBP+A==",
+        "resolved": "7.2.22",
+        "contentHash": "X2Za44VsDTqOB5wNvLrcOh/SE7QAc4d6fdwasbo6ll4yyTVEsdylOBpdBm2/cTw1Hqr55KIBR3g8H+e4VOmBDQ==",
         "dependencies": {
           "Microsoft.Extensions.Http": "8.0.0",
-          "Refit": "7.1.2"
+          "Refit": "7.2.22"
         }
       },
       "SendGrid": {
@@ -554,14 +519,6 @@
         "resolved": "4.5.5",
         "contentHash": "XIWiDvKPXaTveaB7HVganDlOCRoj03l+jrwNvcge/t8vhGYKvqV+dMv6G4SAX2NoNmN0wZfVPTAlFwZcZvVOUw=="
       },
-      "System.Net.Http.Json": {
-        "type": "Transitive",
-        "resolved": "8.0.0",
-        "contentHash": "48Bxrd6zcGeQzS4GMEDVjuqCcAw/9wcEWnIu48FQJ5IzfKPiMR1nGtz9LrvGzU4+3TLbx/9FDlGmCUeLin1Eqg==",
-        "dependencies": {
-          "System.Text.Json": "8.0.0"
-        }
-      },
       "System.Text.Encodings.Web": {
         "type": "Transitive",
         "resolved": "9.0.0",
@@ -601,20 +558,15 @@
         "type": "Project",
         "dependencies": {
           "Microsoft.AspNetCore.Authentication.JwtBearer": "[8.0.8, )",
-          "Microsoft.AspNetCore.Authorization": "[8.0.8, )",
-          "Microsoft.AspNetCore.Http.Abstractions": "[2.2.0, )",
           "Microsoft.AspNetCore.Mvc.Versioning": "[5.1.0, )",
           "Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer": "[5.1.0, )",
-          "Microsoft.Extensions.Configuration": "[8.0.0, )",
-          "Microsoft.Extensions.DependencyInjection": "[8.0.0, )",
-          "Microsoft.Extensions.Http": "[8.0.0, )",
           "Microsoft.Extensions.Http.Polly": "[8.0.7, )",
           "Microsoft.IdentityModel.Protocols.OpenIdConnect": "[8.0.2, )",
           "Microsoft.IdentityModel.Tokens": "[8.0.2, )",
           "Polly": "[8.4.1, )",
           "Polly.Extensions.Http": "[3.0.0, )",
-          "Refit": "[7.1.2, )",
-          "Refit.HttpClientFactory": "[7.1.2, )",
+          "Refit": "[7.2.22, )",
+          "Refit.HttpClientFactory": "[7.2.22, )",
           "System.IdentityModel.Tokens.Jwt": "[8.0.2, )"
         }
       }

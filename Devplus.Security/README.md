@@ -23,6 +23,17 @@
 dotnet add package Devplus.Security
 ```
 
+### 🎯 Compatibilidade
+
+A partir da versão **1.9.0** o pacote é **multi-target** e suporta:
+
+| Target Framework | Suportado |
+| ---------------- | --------- |
+| .NET 8 (`net8.0`)  | ✅        |
+| .NET 10 (`net10.0`) | ✅        |
+
+> As dependências do ASP.NET Core são resolvidas via `FrameworkReference Microsoft.AspNetCore.App`, garantindo a versão correta do runtime em cada target automaticamente.
+
 ## ⚙️ **Configuração**
 
 ### 1. Configurar appsettings.json
@@ -871,6 +882,18 @@ public class AddClaimRequest
   "AllowedHosts": "*"
 }
 ```
+
+## 📜 **Histórico de Versões**
+
+### 1.9.0
+
+- 🎯 **Multi-target `net8.0` + `net10.0`** — suporte explícito a .NET 8 e .NET 10.
+- 🏗️ Dependências do ASP.NET Core migradas para `FrameworkReference Microsoft.AspNetCore.App` (resolução por runtime, sem pacotes pinados).
+- 🔒 **Correção de segurança:** atualização do `Refit`/`Refit.HttpClientFactory` `7.1.2 → 7.2.22`, eliminando a [CVE-2024-51501](https://github.com/advisories/GHSA-3hxg-fxwm-8gf7) (CRLF injection, severidade crítica / CVSS 10.0).
+
+### 1.8.0
+
+- Versão anterior estável (target único `net8.0`).
 
 ## 📄 **Licença**
 
