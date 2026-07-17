@@ -55,6 +55,7 @@ public sealed class SecurityService : ISecurityService
             ClientId = Guid.TryParse(s.ClientId, out var cid) ? cid : null,
             ClientSecret = s.ClientSecret,
             SystemId = s.SystemId,
+            TenantId = user.TenantId, // null no 1º login; preenchido ao concluir com o tenant escolhido
             Password = user.Senha ?? string.Empty,
             Username = user.NomeUsuario ?? string.Empty,
             GrantType = "password"

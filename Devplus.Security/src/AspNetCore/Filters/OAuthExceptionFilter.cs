@@ -48,7 +48,10 @@ public class OAuthExceptionFilter : IExceptionFilter
             code = statusCode.ToString(),
             errorCode = ex.ErrorCode ?? "OAUTH_ERROR",
             message = ex.Message,
-            detailedMessage = ex.ErrorResponse?.DetailedMessage ?? ex.Message
+            detailedMessage = ex.ErrorResponse?.DetailedMessage ?? ex.Message,
+            // SaaS multi-tenant: repassa a lista de tenants para o app apresentar a seleção
+            // (null nos demais erros). O app conclui o login reenviando com o TenantId escolhido.
+            tenants = ex.ErrorResponse?.Tenants
         };
 
         context.Result = new ObjectResult(response) { StatusCode = statusCode };
