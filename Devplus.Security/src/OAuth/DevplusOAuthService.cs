@@ -118,4 +118,10 @@ public class DevplusOAuthService : IOAuthService
         try { return await _devplusOAuthUserService.SelfRegistration(request); }
         catch (ApiException ex) { throw OAuthApiException.FromApiException(ex); }
     }
+
+    public async Task DeleteTenantApp(DeleteTenantAppRequestDto request)
+    {
+        try { await _devplusOAuthUserService.DeleteTenantApp(request); }
+        catch (ApiException ex) { throw OAuthApiException.FromApiException(ex); }
+    }
 }

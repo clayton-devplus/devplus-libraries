@@ -26,4 +26,7 @@ public interface IOAuthService
 
     // Self Registration
     Task<SelfRegistrationResponseDto> SelfRegistration(SelfRegistrationRequestDto request);
+
+    // Exclusão de conta (mantém o tenant)
+    Task DeleteTenantApp(DeleteTenantAppRequestDto request);
 }

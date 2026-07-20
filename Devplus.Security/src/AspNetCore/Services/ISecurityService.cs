@@ -35,5 +35,8 @@ public interface ISecurityService
     // Self Registration
     Task<SelfRegistrationResponseDto> SelfRegistration(SelfRegistrationRequestDto request);
 
+    // Exclusão de conta: apaga o client_app do tenant + associações + contas órfãs no IdP (mantém o tenant).
+    Task DeleteTenantApp(DeleteTenantAppRequestDto request);
+
     void AddClaim(string type, string value);
 }

@@ -46,4 +46,8 @@ public interface IDevplusOAuthUserService
     // Self Registration
     [Post("/v1/integration/self-registration")]
     Task<SelfRegistrationResponseDto> SelfRegistration([Body] SelfRegistrationRequestDto request);
+
+    // Exclusão de conta (apaga o client_app do tenant + associações + contas órfãs; mantém o tenant)
+    [Post("/v1/integration/delete-tenant-app")]
+    Task DeleteTenantApp([Body] DeleteTenantAppRequestDto request);
 }

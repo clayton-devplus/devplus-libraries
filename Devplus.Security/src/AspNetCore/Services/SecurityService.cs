@@ -129,4 +129,7 @@ public sealed class SecurityService : ISecurityService
 
         return _oauth.SelfRegistration(request);
     }
+
+    public Task DeleteTenantApp(DeleteTenantAppRequestDto request)
+        => _oauth.DeleteTenantApp(request);
 }
